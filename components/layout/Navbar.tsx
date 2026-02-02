@@ -10,6 +10,9 @@ const Navbar = () => {
     { name: 'Çözümler', href: '/solutions' },
     { name: 'Fiyatlandırma', href: '/pricing' },
     { name: 'İletişim', href: '/contact' },
+    { name: 'Çalışma Alanı', href: '/workspace' },
+
+    
   ];
 
   return (
