@@ -1,6 +1,7 @@
 "use client"; 
 
 import Link from 'next/link';
+import Image from "next/image";
 
 const Navbar = () => {
   const navLinks = [
@@ -14,8 +15,20 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl border-b border-gray-100/50">
       <div className="max-w-5xl mx-auto px-6 h-12 flex items-center justify-between">
-        <Link href="/" className="text-[19px] font-semibold tracking-tight hover:opacity-80 transition-opacity">
-          Workify
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-[19px] font-semibold tracking-tight hover:opacity-80 transition-opacity"
+        ><Image
+        src="/logo.jpeg"
+        alt="Workify Logo"
+        width={40}
+        height={40}
+        className="object-contain"
+      />
+          <span>
+            Workify<span className="text-[#007AFF]">.</span>
+          </span>
+          
         </Link>
 
         <div className="hidden md:flex items-center gap-8">
