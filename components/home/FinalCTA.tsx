@@ -9,7 +9,7 @@ const FinalCTA = () => {
             Workify ile tanışan binlerce geliştirici ve öğrenci arasına katılın.
           </p>
           <button className="bg-white text-[#007AFF] px-10 py-4 rounded-full text-lg font-bold hover:bg-blue-50 transition-colors shadow-xl">
-            Şimdi Ücretsiz Başla
+            Şimdi  Başla
           </button>
         </div>
       </section>
