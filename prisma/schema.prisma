@@ -1,0 +1,168 @@
+generator client {
+ provider = "prisma-client-js"
+}
+datasource db {
+ provider = "postgresql"
+ url = env("DATABASE_URL")
+}
+model User {
+ id String @id
+ name String
+ email String @unique
+ emailVerified Boolean @default(false)
+ image String?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ twoFactorEnabled Boolean @default(false)
+ sessions Session[]
+ accounts Account[]
+ twoFactors TwoFactor[]
+ memberships Membership[]
+}
+model Session {
+ id String @id
+ expiresAt DateTime
+ token String @unique
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ ipAddress String?
+ userAgent String?
+ userId String
+ user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+ @@index([userId])
+}
+model Account {
+ id String @id
+ accountId String
+ providerId String
+ userId String
+ user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+ accessToken String?
+ refreshToken String?
+ idToken String?
+ accessTokenExpiresAt DateTime?
+ refreshTokenExpiresAt DateTime?
+ scope String?
+ password String?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ @@unique([providerId, accountId])
+ @@index([userId])
+}
+model Verification {
+ id String @id
+ identifier String
+ value String
+ expiresAt DateTime
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ @@index([identifier])
+}
+model TwoFactor {
+ id String @id
+ secret String
+ backupCodes String
+ verified Boolean @default(true)
+ failedVerificationCount Int @default(0)
+ lockedUntil DateTime?
+ userId String
+ user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+ @@index([userId])
+}
+model RateLimit {
+ id String @id
+ key String @unique
+ count Int
+ lastRequest BigInt
+}
+enum Role {
+ ADMIN
+ EMPLOYEE
+}
+enum TaskStatus {
+ BACKLOG
+ TODO
+ IN_PROGRESS
+ IN_REVIEW
+ COMPLETED
+ CANCELLED
+}
+enum Priority {
+ LOW
+ MEDIUM
+ HIGH
+ URGENT
+}
+model Organization {
+ id String @id @default(cuid())
+ name String
+ createdAt DateTime @default(now())
+ memberships Membership[]
+ brands Brand[]
+ tasks Task[]
+}
+model Membership {
+ id String @id @default(cuid())
+ organizationId String
+ userId String
+ role Role @default(EMPLOYEE)
+ active Boolean @default(true)
+ organization Organization @relation(fields:[organizationId], references:[id], onDelete:Restrict)
+ user User @relation(fields:[userId], references:[id], onDelete:Restrict)
+ brands BrandMember[]
+ assignments TaskAssignment[]
+ @@unique([organizationId,userId])
+ @@unique([organizationId,id])
+ @@index([userId,active])
+}
+model Brand {
+ id String @id @default(cuid())
+ organizationId String
+ name String
+ description String @default("")
+ archived Boolean @default(false)
+ createdAt DateTime @default(now())
+ organization Organization @relation(fields:[organizationId], references:[id], onDelete:Restrict)
+ members BrandMember[]
+ tasks Task[]
+ @@unique([organizationId,id])
+ @@index([organizationId,archived])
+}
+model BrandMember {
+ organizationId String
+ brandId String
+ membershipId String
+ brand Brand @relation(fields:[organizationId,brandId], references:[organizationId,id], onDelete:Cascade)
+ membership Membership @relation(fields:[organizationId,membershipId], references:[organizationId,id], onDelete:Cascade)
+ @@id([brandId,membershipId])
+ @@index([organizationId,membershipId])
+}
+model Task {
+ id String @id @default(cuid())
+ organizationId String
+ brandId String
+ title String
+ description String @default("")
+ status TaskStatus @default(TODO)
+ priority Priority @default(MEDIUM)
+ dueAt DateTime?
+ position Int @default(0)
+ version Int @default(0)
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ organization Organization @relation(fields:[organizationId], references:[id], onDelete:Restrict)
+ brand Brand @relation(fields:[organizationId,brandId], references:[organizationId,id], onDelete:Restrict)
+ assignments TaskAssignment[]
+ @@unique([organizationId,id])
+ @@index([organizationId,brandId,status])
+ @@index([organizationId,dueAt])
+}
+model TaskAssignment {
+ organizationId String
+ taskId String
+ membershipId String
+ task Task @relation(fields:[organizationId,taskId], references:[organizationId,id], onDelete:Cascade)
+ membership Membership @relation(fields:[organizationId,membershipId], references:[organizationId,id], onDelete:Restrict)
+ @@id([taskId,membershipId])
+ @@index([organizationId,membershipId])
+}
