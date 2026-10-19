@@ -2,8 +2,6 @@ import Link from 'next/link';
 import { currentActor } from '@/lib/current-actor';
 import { db } from '@/lib/db';
 import { brandScope } from '@/services/context';
-import { ActionForm } from '@/components/action-form';
-import { BrandFields } from '@/components/brand-fields';
 export default async function Brands({
   searchParams,
 }: {
@@ -45,16 +43,15 @@ export default async function Brands({
         </form>
       </div>
       {actor.role === 'ADMIN' && (
-        <details
-          className="panel disclosure"
-          id="new"
-          open={brands.length === 0}
-        >
-          <summary>＋ Yeni marka oluştur</summary>
-          <ActionForm operation="brand-save" label="Markayı oluştur">
-            <BrandFields />
-          </ActionForm>
-        </details>
+        <div className="brand-create-bar">
+          <p>
+            Yeni müşterinizin bilgilerini ekleyin, ardından ekibini ve
+            görevlerini belirleyin.
+          </p>
+          <Link className="button-link" href="/workspace/brands/new">
+            ＋ Marka ekle
+          </Link>
+        </div>
       )}
       <div className="brand-grid">
         {brands.map((brand) => (

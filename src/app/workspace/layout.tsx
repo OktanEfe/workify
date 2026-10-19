@@ -13,7 +13,7 @@ export default async function WorkspaceLayout({
   const [user, unread] = await Promise.all([
     db.user.findUniqueOrThrow({
       where: { id: actor.userId },
-      select: { name: true },
+      select: { name: true, email: true },
     }),
     db.notification.count({
       where: {
@@ -75,6 +75,10 @@ export default async function WorkspaceLayout({
           <Link className="notification-link" href="/workspace/notifications">
             Bildirimler {unread > 0 && <b>{unread}</b>}
           </Link>
+          <div className="session-identity">
+            <strong>{actor.role === 'ADMIN' ? 'Yönetici' : 'Çalışan'}</strong>
+            <small>{user.email}</small>
+          </div>
           <span className="avatar small">{user.name.charAt(0)}</span>
         </header>
         <main className="app-main">{children}</main>

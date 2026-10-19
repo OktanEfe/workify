@@ -30,31 +30,35 @@ export function Navigation({ admin }: { admin: boolean }) {
   const pathname = usePathname();
   return (
     <nav className="app-navigation">
-      {groups.map((group) => (
-        <div className="nav-group" key={group.label}>
-          <span>{group.label}</span>
-          {group.items
-            .filter((item) => item[3] !== 'admin' || admin)
-            .map(([href, label, icon]) => (
-              <Link
-                key={href}
-                href={href}
-                aria-current={
-                  (
-                    href === '/workspace'
-                      ? pathname === href
-                      : pathname.startsWith(href)
-                  )
-                    ? 'page'
-                    : undefined
-                }
-              >
-                <i aria-hidden="true">{icon}</i>
-                {label}
-              </Link>
-            ))}
-        </div>
-      ))}
+      {groups
+        .filter((group) =>
+          group.items.some((item) => item[3] !== 'admin' || admin),
+        )
+        .map((group) => (
+          <div className="nav-group" key={group.label}>
+            <span>{group.label}</span>
+            {group.items
+              .filter((item) => item[3] !== 'admin' || admin)
+              .map(([href, label, icon]) => (
+                <Link
+                  key={href}
+                  href={href}
+                  aria-current={
+                    (
+                      href === '/workspace'
+                        ? pathname === href
+                        : pathname.startsWith(href)
+                    )
+                      ? 'page'
+                      : undefined
+                  }
+                >
+                  <i aria-hidden="true">{icon}</i>
+                  {label}
+                </Link>
+              ))}
+          </div>
+        ))}
     </nav>
   );
 }

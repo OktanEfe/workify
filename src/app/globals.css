@@ -1623,3 +1623,59 @@ pre {
     font-size: 9px;
   }
 }
+
+/* Keep account and available actions visible on all screen sizes. */
+.session-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 12px;
+}
+.session-identity small {
+  font-size: 11px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.brand-create-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+  padding: 20px;
+  border: 1px solid #dbe5dc;
+  border-radius: 12px;
+  background: #eef4ee;
+}
+.brand-create-bar p {
+  margin: 0;
+}
+.brand-create-bar a {
+  flex-shrink: 0;
+}
+@media (max-width: 760px) {
+  .app-navigation {
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+  .app-topbar {
+    height: auto;
+    min-height: 64px;
+    flex-wrap: wrap;
+    padding: 12px 17px;
+  }
+  .app-topbar > span:first-child {
+    display: none;
+  }
+  .notification-link {
+    margin-left: 0;
+    margin-right: auto;
+  }
+  .session-identity {
+    font-size: 11px;
+  }
+  .brand-create-bar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

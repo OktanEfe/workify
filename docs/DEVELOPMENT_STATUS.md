@@ -29,3 +29,8 @@ DB: `npm run db:local`; uygulama: `npm run dev`; hatırlatmalar: `npm run worker
 Davet ve e-posta/parola sıfırlama teslimatı; zaman takibi; içerik takvimi/onayları; hizmet paketi ve kullanım defteri; özel dosya depolama; raporlar; mention; bağımsız atanabilen alt görevler; proje şablonları; çoklu kurum seçimi henüz tamamlanmadı. Kanban durumlar arasında taşır; aynı sütun içinde sürükleyerek sıralama tamamlanmadı. Yapılacak düzenleme ve gelişmiş tekrar seçenekleri eksik.
 
 Railway/üretim DB, obje depolama, CI/CD, monitoring ve yedekten geri yükleme tatbikatı doğrulanmadı. Önceki bağımlılık taramasında çalışma zamanı 0, geliştirme araçları 8 yüksek bulgu vardı. Üretime hazır olduğu iddia edilmez; üretim dağıtımı yapılmadı.
+
+
+## Erişim ve kullanılabilirlik düzeltmesi
+
+Marka ekleme, belirgin düğmeyle `/workspace/brands/new` sayfasına taşındı. Sayfa sunucuda ADMIN kontrolü yapar. Üst çubukta oturum e-postası ve Yönetici/Çalışan rolü görünür. Mobil menü kaydırma yerine satırlara bölünür; çalışan boş durum mesajı marka oluşturmasını istemez. İki gerçek hesapla HTTP kontrollerinde yönetici sayfaları 200, çalışan için marka oluşturma/yapılacaklar/ekip sayfaları 404 verdi. Tarayıcıdan marka kaydı ve çalışan girişi doğrulandı; yalnız geçici kontrol markası temizlendi. Entegrasyon testleri 12/12, tür/lint ve üretim derlemesi başarılı. Codex tarayıcısı ve kişinin diğer tarayıcısı farklı oturum çerezleri kullanabilir; aynı URL farklı hesap menüleri gösterebilir.

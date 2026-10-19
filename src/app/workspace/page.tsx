@@ -37,8 +37,17 @@ export default async function Workspace() {
               : 'Size atanan işler ve yaklaşan teslimler, tek bir yerde.'}
           </p>
         </div>
-        <Link className="button-link" href="/workspace/tasks#new">
-          ＋ Görev oluştur
+        <Link
+          className="button-link"
+          href={
+            actor.role === 'ADMIN' && data.brands === 0
+              ? '/workspace/brands/new'
+              : '/workspace/tasks#new'
+          }
+        >
+          {actor.role === 'ADMIN' && data.brands === 0
+            ? '＋ İlk markanı ekle'
+            : '＋ Görev oluştur'}
         </Link>
       </div>
       <section className="stat-grid" aria-label="İş özeti">
@@ -109,16 +118,18 @@ export default async function Workspace() {
               <span>▦</span>
               <h3>Yeni işler için alan açıldı</h3>
               <p>
-                Önce bir marka ekleyin, ardından ekibiniz için görev oluşturun.
+                {actor.role === 'ADMIN'
+                  ? 'Önce bir marka ekleyin, ardından ekibiniz için görev oluşturun.'
+                  : 'Henüz size atanmış görev yok. Yöneticiniz marka ve görev atadığında işleriniz burada görünecek.'}
               </p>
               <Link
                 href={
                   actor.role === 'ADMIN'
-                    ? '/workspace/brands'
+                    ? '/workspace/brands/new'
                     : '/workspace/tasks'
                 }
               >
-                Başlayın →
+                {actor.role === 'ADMIN' ? '＋ Marka ekle' : 'Görevlerime git →'}
               </Link>
             </div>
           )}
