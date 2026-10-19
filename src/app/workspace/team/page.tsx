@@ -20,6 +20,68 @@ export default async function Team() {
           {members.filter((m) => m.active).length} aktif üye
         </span>
       </div>
+      <section className="panel" id="new">
+        <h2>＋ Çalışan ekle</h2>
+        <p>
+          Çalışan bu e-posta ve parolayla giriş yapabilir. Marka ve görev
+          erişimini ekledikten sonra atayabilirsiniz. Otomatik e-posta
+          gönderilmez.
+        </p>
+        <ActionForm operation="employee-create" label="Çalışanı oluştur" reset>
+          <div className="form-grid">
+            <label>
+              Ad soyad
+              <input
+                name="name"
+                required
+                minLength={2}
+                maxLength={100}
+                autoComplete="off"
+              />
+            </label>
+            <label>
+              E-posta
+              <input
+                name="email"
+                type="email"
+                required
+                maxLength={254}
+                autoComplete="off"
+              />
+            </label>
+            <label>
+              İş unvanı <small>(isteğe bağlı)</small>
+              <input name="jobTitle" maxLength={100} />
+            </label>
+            <label>
+              Parola
+              <input
+                name="password"
+                type="password"
+                required
+                minLength={12}
+                maxLength={128}
+                autoComplete="new-password"
+              />
+            </label>
+            <label>
+              Parola tekrarı
+              <input
+                name="confirmation"
+                type="password"
+                required
+                minLength={12}
+                maxLength={128}
+                autoComplete="new-password"
+              />
+            </label>
+          </div>
+          <p>
+            En az 12 karakter kullanın. Parolayı çalışanla güvenli bir kanaldan
+            paylaşın.
+          </p>
+        </ActionForm>
+      </section>
       <div className="team-grid">
         {members.map((member) => {
           const open = member.assignments.filter(

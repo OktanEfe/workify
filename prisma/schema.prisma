@@ -133,6 +133,7 @@ model Brand {
  email String @default("")
  phone String @default("")
  version Int @default(0)
+ contents ContentItem[]
  projects Project[]
  members BrandMember[]
  tasks Task[]
@@ -268,4 +269,31 @@ model Notification {
  createdAt DateTime @default(now())
  membership Membership @relation(fields:[organizationId,membershipId],references:[organizationId,id],onDelete:Restrict)
  @@index([organizationId,membershipId,createdAt])
+}
+
+enum ContentStatus {
+ DRAFT
+ IN_REVIEW
+ REVISION
+ APPROVED
+ SCHEDULED
+ PUBLISHED
+}
+model ContentItem {
+ id String @id @default(cuid())
+ organizationId String
+ brandId String
+ title String
+ channel String @default("Instagram")
+ format String @default("Gönderi")
+ body String @default("")
+ status ContentStatus @default(DRAFT)
+ scheduledAt DateTime?
+ publishedAt DateTime?
+ version Int @default(0)
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ brand Brand @relation(fields:[organizationId,brandId], references:[organizationId,id], onDelete:Restrict)
+ @@index([organizationId,scheduledAt])
+ @@index([organizationId,brandId,status])
 }

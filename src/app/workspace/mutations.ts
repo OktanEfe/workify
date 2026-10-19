@@ -8,6 +8,12 @@ import {
   updateMember,
 } from '@/services/todos';
 import { updateTaskStatus } from '@/services/tasks';
+import { createEmployee } from '@/services/staff';
+import {
+  createContent,
+  changeContentStatus,
+  editContent,
+} from '@/services/content';
 import { AccessDenied } from '@/lib/access';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
@@ -21,6 +27,43 @@ export async function submitOperation(
   try {
     let href: string | undefined;
     switch (str('operation')) {
+      case 'employee-create':
+        await createEmployee(actor, {
+          name: str('name'),
+          email: str('email').trim(),
+          jobTitle: str('jobTitle'),
+          password: str('password'),
+          confirmation: str('confirmation'),
+        });
+        break;
+      case 'content-create':
+        await createContent(actor, {
+          title: str('title'),
+          brandId: str('brandId'),
+          channel: str('channel'),
+          format: str('format'),
+          body: str('body'),
+          scheduledAt: str('scheduledAt'),
+        });
+        break;
+      case 'content-edit':
+        await editContent(actor, str('id'), Number(str('version')), {
+          title: str('title'),
+          brandId: str('brandId'),
+          channel: str('channel'),
+          format: str('format'),
+          body: str('body'),
+          scheduledAt: str('scheduledAt'),
+        });
+        break;
+      case 'content-status':
+        await changeContentStatus(
+          actor,
+          str('id'),
+          Number(str('version')),
+          str('status'),
+        );
+        break;
       case 'brand-save': {
         const id = await ops.saveBrand(
           actor,
@@ -169,6 +212,11 @@ export async function submitOperation(
         'Hatırlatma veya tekrarlama için tarih girin.',
         'Kendi yönetici erişiminizi kaldıramazsınız.',
         'Son yönetici kaldırılamaz.',
+        'Bu e-posta adresi zaten kullanılıyor.',
+        'Planlamak için önce yayın tarihi girin.',
+        'Yayınlandı olarak işaretlemeden önce içeriği onaylayın.',
+        'İçerik değişti. Sayfayı yenileyin.',
+        'Yayınlanan içeriği düzenlemek için önce taslağa alın.',
         'Marka değişti veya erişilemiyor. Sayfayı yenileyin.',
         'Görev değişti. Sayfayı yenileyip tekrar deneyin.',
       ].includes(error.message)

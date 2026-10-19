@@ -8,7 +8,11 @@ const optionalText = (max = 5000) => z.string().trim().max(max).default('');
 const id = text(100);
 export const brandInput = z
   .object({
-    name: text(),
+    name: z
+      .string()
+      .trim()
+      .max(200)
+      .transform((v) => v || 'İsimsiz marka'),
     description: optionalText(),
     sector: optionalText(100),
     website: z

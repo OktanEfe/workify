@@ -24,8 +24,8 @@ export default async function NewBrand() {
         <div>
           <h1>Marka ekle</h1>
           <p>
-            Yalnız marka adı zorunludur. Diğer bilgileri daha sonra
-            tamamlayabilirsiniz.
+            Tüm alanlar isteğe bağlıdır. Ad girmezseniz “İsimsiz marka” olarak
+            kaydedilir. Bilgileri daha sonra tamamlayabilirsiniz.
           </p>
         </div>
       </div>

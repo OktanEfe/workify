@@ -26,7 +26,7 @@ DB: `npm run db:local`; uygulama: `npm run dev`; hatırlatmalar: `npm run worker
 
 ## Kalan kapsam
 
-Davet ve e-posta/parola sıfırlama teslimatı; zaman takibi; içerik takvimi/onayları; hizmet paketi ve kullanım defteri; özel dosya depolama; raporlar; mention; bağımsız atanabilen alt görevler; proje şablonları; çoklu kurum seçimi henüz tamamlanmadı. Kanban durumlar arasında taşır; aynı sütun içinde sürükleyerek sıralama tamamlanmadı. Yapılacak düzenleme ve gelişmiş tekrar seçenekleri eksik.
+Davet ve e-posta/parola sıfırlama teslimatı; zaman takibi; müşteri dış onayları; hizmet paketi ve kullanım defteri; özel dosya depolama; raporlar; mention; bağımsız atanabilen alt görevler; proje şablonları; çoklu kurum seçimi henüz tamamlanmadı. Kanban durumlar arasında taşır; aynı sütun içinde sürükleyerek sıralama tamamlanmadı. Yapılacak düzenleme ve gelişmiş tekrar seçenekleri eksik.
 
 Railway/üretim DB, obje depolama, CI/CD, monitoring ve yedekten geri yükleme tatbikatı doğrulanmadı. Önceki bağımlılık taramasında çalışma zamanı 0, geliştirme araçları 8 yüksek bulgu vardı. Üretime hazır olduğu iddia edilmez; üretim dağıtımı yapılmadı.
 
@@ -39,3 +39,17 @@ Marka ekleme, belirgin düğmeyle `/workspace/brands/new` sayfasına taşındı.
 ## Yerel adres ve giriş teşhisi
 
 Geliştirmede 127.0.0.1 istekleri BETTER_AUTH_URL localhost adresine geçici 307 ile yönlendirilir; yol ve sorgu korunur. Üretimde bu kural uygulanmaz. Böylece aynı tarayıcıda IP/hostname arasında ayrı oturum çerezleri oluşması önlenir. Chrome'da 429 geçici giriş limiti doğrudan gözlendi. Giriş formu 429, 403 ve hatalı kimlik bilgisini ayrı mesajlarla gösterir; rate limit kapatılmadı. Marka oluşturma sayfasında çalışan oturumu artık 404 yerine yönetici girişi gerektiğini açıklar; kaydetme servisi ADMIN kontrolünü korur.
+
+
+## Çalışan, takvim, içerik ve tema — 19 Ekim 2026
+
+- Yönetici Çalışanlar sayfasında ad/e-posta/unvan/parola ile gerçek çalışan hesabı oluşturabilir. Rol EMPLOYEE olarak sabittir; yinelenen e-posta ve parola eşleşmesi doğrulanır, Argon2id özeti kaydedilir; otomatik e-posta gönderilmez. Genel kayıt kapalıdır.
+- `/workspace/calendar`: İstanbul saatine göre aylık görev teslimleri, içerik yayın planları ve yalnız sahibinin yönetici yapılacakları; önceki/sonraki ay ve marka filtresi. Her kaynak en fazla 500 kayıt; sınır uyarısı vardır.
+- `/workspace/content`: marka/kanal/format/metin/yayın planı oluşturma, düzenleme, arama, marka/durum filtreleri ve altı durum. Düzenleme onayı taslağa döndürür; yayınlanan içerik önce taslağa alınmalıdır. Yayınlandı manuel kayıt olup sosyal ağlara paylaşım değildir. En fazla 100 kayıt gösterilir.
+- Çalışan içerik ve takvim okumaları aktif marka üyeliğiyle sınırlandırılır; görevler için ayrıca atama gerekir. İçerik oluşturma/düzenleme/durum değişikliği yöneticiye aittir. Bileşik kurum/marka FK ve audit korunur.
+- Marka alanlarının tamamı isteğe bağlıdır. Ad boşsa “İsimsiz marka” kaydedilir; dolu e-posta/URL değerlerinin biçimi doğrulanır.
+- Gece mavisi/fildişi tema; koyu navigasyon, açık kartlar ve telefon ekranında alt alta takvim günleri.
+
+Doğrulama: 44 birim testi, ayrı PostgreSQL veritabanında 17 entegrasyon testi, lint/tür kontrolü, üretim derlemesi ve Prisma validate geçti. Tarayıcıdan boş marka kaydı ve içerik oluşturma → takvimde 20 Ekim 14:30 görünümü doğrulandı. Yalnız bu UI testinin sabit kimlikli marka/içerik kayıtları temizlendi; mevcut kişisel yapılacaklar korundu. Şema eklendikten sonra geliştirme sunucusu yeni Prisma istemcisiyle yenilendi.
+
+Kalanlar: güvenli davet/e-posta teslimatı ve parola sıfırlama; zaman takibi; dosya yükleme; hizmet paketleri; müşteri dış onayı; sosyal ağ entegrasyonları; rapor dışa aktarma. İlk içerik modülü bu özelliklerin tamamlandığı anlamına gelmez.

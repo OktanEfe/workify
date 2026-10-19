@@ -1,3 +1,11 @@
+import { verify } from 'argon2';
+import { createEmployee } from '../../src/services/staff';
+import {
+  createContent,
+  changeContentStatus,
+  listContent,
+  editContent,
+} from '../../src/services/content';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { db } from '../../src/lib/db';
@@ -80,6 +88,7 @@ suite('PostgreSQL: kurum, görev, özel alan ve audit', () => {
     await db.task.deleteMany({ where });
     await db.project.deleteMany({ where });
     await db.brandMember.deleteMany({ where });
+    await db.contentItem.deleteMany({ where });
     await db.brand.deleteMany({ where });
     await db.membership.deleteMany({ where });
     await db.organization.deleteMany({ where: { id: { in: orgs } } });
@@ -293,5 +302,137 @@ suite('PostgreSQL: kurum, görev, özel alan ve audit', () => {
     await expect(
       updateMember(admin, admin.membershipId, '', 'EMPLOYEE', false),
     ).rejects.toThrow('Kendi yönetici');
+  });
+  it('boş marka formunu varsayılan adla kaydeder', async () => {
+    const id = await saveBrand(admin, { name: '' });
+    expect((await db.brand.findUniqueOrThrow({ where: { id } })).name).toBe(
+      'İsimsiz marka',
+    );
+  });
+  it('yönetici çalışan oluşturur; çalışan ve sahte rol oluşturamaz', async () => {
+    const email = randomUUID() + '@example.test';
+    const password = 'IntegrationOnly!123';
+    await expect(
+      createEmployee(
+        { ...employee, role: 'ADMIN' },
+        { name: 'Test employee', email, password, confirmation: password },
+      ),
+    ).rejects.toThrow();
+    const id = await createEmployee(admin, {
+      name: 'Test employee',
+      email,
+      password,
+      confirmation: password,
+    });
+    const m = await db.membership.findUniqueOrThrow({
+      where: { id },
+      include: { user: { include: { accounts: true } } },
+    });
+    users.push(m.userId);
+    expect(m.role).toBe('EMPLOYEE');
+    expect(m.organizationId).toBe(admin.organizationId);
+    expect(await verify(m.user.accounts[0].password!, password)).toBe(true);
+    await expect(
+      createEmployee(admin, {
+        name: 'Duplicate',
+        email,
+        password,
+        confirmation: password,
+      }),
+    ).rejects.toThrow('zaten kullanılıyor');
+    await expect(
+      createEmployee(admin, {
+        name: 'Mismatch',
+        email: randomUUID() + '@example.test',
+        password,
+        confirmation: 'wrong',
+      }),
+    ).rejects.toThrow();
+  });
+  it('içerik erişimi marka ve kurumla sınırlıdır; çalışan durum değiştiremez', async () => {
+    const brandId = await assignedBrand();
+    const id = await createContent(admin, {
+      title: 'Planlanan içerik',
+      brandId,
+      channel: 'Instagram',
+      format: 'Reels',
+      scheduledAt: '2026-10-20T12:00',
+    });
+    expect((await listContent(employee)).some((c) => c.id === id)).toBe(true);
+    expect((await listContent(unauthorized)).some((c) => c.id === id)).toBe(
+      false,
+    );
+    expect((await listContent(outsider)).some((c) => c.id === id)).toBe(false);
+    await expect(
+      changeContentStatus(employee, id, 0, 'APPROVED'),
+    ).rejects.toThrow();
+    await expect(
+      createContent(outsider, {
+        title: 'Wrong org',
+        brandId,
+        channel: 'Web',
+        format: 'Yazı',
+      }),
+    ).rejects.toThrow();
+    await expect(
+      db.contentItem.create({
+        data: {
+          organizationId: outsider.organizationId,
+          brandId,
+          title: 'Invalid FK',
+        },
+      }),
+    ).rejects.toThrow();
+    await setBrandMember(admin, brandId, employee.membershipId, false);
+    expect((await listContent(employee)).some((c) => c.id === id)).toBe(false);
+  });
+  it('içerik yayın kaydı onay ve sürüm kontrolü gerektirir', async () => {
+    const brandId = await assignedBrand();
+    const id = await createContent(admin, {
+      title: 'Yayın denetimi',
+      brandId,
+      channel: 'Web',
+      format: 'Yazı',
+    });
+    await expect(
+      changeContentStatus(admin, id, 0, 'SCHEDULED'),
+    ).rejects.toThrow('yayın tarihi');
+    await expect(
+      changeContentStatus(admin, id, 0, 'PUBLISHED'),
+    ).rejects.toThrow('onaylayın');
+    await changeContentStatus(admin, id, 0, 'APPROVED');
+    await expect(changeContentStatus(admin, id, 0, 'REVISION')).rejects.toThrow(
+      'İçerik değişti',
+    );
+    await changeContentStatus(admin, id, 1, 'PUBLISHED');
+    expect(
+      (await db.contentItem.findUniqueOrThrow({ where: { id } })).publishedAt,
+    ).not.toBeNull();
+  });
+  it('içerik düzenleme onayı sıfırlar ve başka kurumdan korunur', async () => {
+    const brandId = await assignedBrand();
+    const input = {
+      title: 'Düzenleme',
+      brandId,
+      channel: 'Instagram',
+      format: 'Reels',
+      scheduledAt: '2026-10-21T10:00',
+    };
+    const id = await createContent(admin, input);
+    await changeContentStatus(admin, id, 0, 'APPROVED');
+    await expect(editContent(outsider, id, 1, input)).rejects.toThrow();
+    await expect(editContent(employee, id, 1, input)).rejects.toThrow();
+    await editContent(admin, id, 1, {
+      ...input,
+      title: 'Güncel metin',
+      scheduledAt: '2026-10-22T11:30',
+    });
+    const item = await db.contentItem.findUniqueOrThrow({ where: { id } });
+    expect(item.status).toBe('DRAFT');
+    expect(item.title).toBe('Güncel metin');
+    expect(localStamp(item.scheduledAt!)).toBe('2026-10-22T11:30');
+    await expect(editContent(admin, id, 1, input)).rejects.toThrow(
+      'İçerik değişti',
+    );
   });
 });

@@ -15,6 +15,8 @@ const groups = [
     items: [
       ['/workspace/tasks', 'Görevler', '▦'],
       ['/workspace/projects', 'Projeler', '▱'],
+      ['/workspace/calendar', 'Takvim', '▦'],
+      ['/workspace/content', 'İçerik takibi', '▤'],
       ['/workspace/brands', 'Markalar', '◎'],
     ],
   },

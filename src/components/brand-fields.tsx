@@ -11,17 +11,16 @@ export function BrandFields({ brand = {} }: { brand?: BrandValues }) {
   return (
     <div className="form-grid">
       <label>
-        Marka adı
+        Marka adı (isteğe bağlı)
         <input
           name="name"
-          required
           maxLength={200}
           defaultValue={brand.name}
           placeholder="Müşterinizin marka adı"
         />
       </label>
       <label>
-        Sektör
+        Sektör (isteğe bağlı)
         <input
           name="sector"
           maxLength={100}
