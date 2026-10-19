@@ -4,12 +4,14 @@ const mocks = vi.hoisted(() => ({
   task: vi.fn(),
   update: vi.fn(),
   list: vi.fn(),
+  audit: vi.fn(),
 }));
 vi.mock('../src/lib/db', () => ({
   db: {
     $transaction: async (fn: (tx: unknown) => unknown) =>
       fn({
         membership: { findUnique: mocks.member },
+        auditLog: { create: mocks.audit },
         task: { findFirst: mocks.task, updateMany: mocks.update },
       }),
     task: { findMany: mocks.list },
@@ -48,7 +50,8 @@ describe('Görev servisleri', () => {
       expect.objectContaining({
         where: {
           organizationId: 'org1',
-          brand: { members: { some: { membershipId: 'm1' } } },
+          deletedAt: null,
+          brand: { archived: false, members: { some: { membershipId: 'm1' } } },
           assignments: { some: { membershipId: 'm1' } },
         },
         take: 30,
@@ -68,8 +71,32 @@ describe('Görev servisleri', () => {
     });
     expect(mocks.update).toHaveBeenCalledWith({
       where: { id: 't1', organizationId: 'org1', version: 3 },
-      data: { status: 'COMPLETED', version: { increment: 1 } },
+      data: {
+        status: 'COMPLETED',
+        completedAt: expect.any(Date),
+        version: { increment: 1 },
+      },
     });
+  });
+  it('tamamlanan görevin ilk tamamlanma zamanını korur', async () => {
+    const completedAt = new Date('2026-10-18T10:00:00Z');
+    mocks.task.mockResolvedValue({
+      id: 't1',
+      organizationId: 'org1',
+      completedAt,
+      assignments: [{ membershipId: 'm1' }],
+      brand: { members: [{ membershipId: 'm1' }] },
+    });
+    await updateTaskStatus(actor, {
+      id: 't1',
+      version: 2,
+      status: 'COMPLETED',
+    });
+    expect(mocks.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ completedAt }),
+      }),
+    );
   });
   it('iptal edilmiş üyeliği yeniden kontrol eder', async () => {
     mocks.member.mockResolvedValue({
@@ -82,6 +109,7 @@ describe('Görev servisleri', () => {
       updateTaskStatus(actor, { id: 't1', version: 0, status: 'TODO' }),
     ).rejects.toThrow();
     expect(mocks.update).not.toHaveBeenCalled();
+    expect(mocks.audit).not.toHaveBeenCalled();
   });
   it('eski yönetici rolüne güvenmez', async () => {
     mocks.task.mockResolvedValue({
@@ -97,6 +125,7 @@ describe('Görev servisleri', () => {
       ),
     ).rejects.toThrow();
     expect(mocks.update).not.toHaveBeenCalled();
+    expect(mocks.audit).not.toHaveBeenCalled();
   });
   it('başka kuruma ait kaynağı reddeder', async () => {
     mocks.task.mockResolvedValue({
@@ -109,6 +138,7 @@ describe('Görev servisleri', () => {
       updateTaskStatus(actor, { id: 't1', version: 0, status: 'TODO' }),
     ).rejects.toThrow();
     expect(mocks.update).not.toHaveBeenCalled();
+    expect(mocks.audit).not.toHaveBeenCalled();
   });
   it('eşzamanlı güncelleme çakışmasını bildirir', async () => {
     mocks.update.mockResolvedValue({ count: 0 });

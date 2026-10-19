@@ -1,12 +1,12 @@
 # Yol haritası
 
-1. Temel: repo, Next.js, auth şeması, kurum izolasyonu, negatif erişim testleri.
-2. Gerçek PostgreSQL entegrasyon testleri ve migration; ilk admin için güvenli tek seferlik kurulum; audit log.
-3. Tek kullanımlık admin daveti, parola sıfırlama teslimatı, MFA kurulum/doğrulama, session iptali. DB ve e-posta teslimat ayarı gerekir.
-4. Yönetici/çalışan panoları; marka CRUD ve üyelik; görev oluşturma, atama, yorum, alt görev ve kalıcı Kanban sıralaması.
-5. Paket şablonundan bağımsız abonelik snapshot'ları; idempotent kullanım defteri ve hesap testleri.
-6. İçerik takvimi ve onay geçmişi; yayınlandı durumu yalnız doğrulanmış işlemle.
-7. Özel notlar, açık paylaşımlar, bildirimler ve mention.
-8. Özel S3 depolama; dosya türü/boyut ve erişim testleri.
-9. E2E, erişilebilirlik, güvenlik ve yük kontrolleri; Railway config, readiness, yedek geri yükleme tatbikatı.
-10. Üretim öncesi ürün sahibi onayı. Ücretli kaynak veya public servis otomatik açılmaz.
+Tamamlanan ilk operasyon sürümü: gerçek panolar, marka/ekip yönetimi, görev/proje/liste/Kanban, yorum/kontrol listesi, özel yönetici yapılacakları, hatırlatma işçisi, uygulama bildirimleri ve audit. Ayrıntılar DEVELOPMENT_STATUS.md içinde.
+
+1. Davet ve güvenli parola sıfırlama teslimatı; oturum/MFA uçtan uca kontrolleri.
+2. Görev alt işleri, aynı sütun içinde sıralama, proje düzenleme/şablonları, yapılacak düzenleme ve özel tekrarlar.
+3. Zaman takibi ve iş yükü raporları.
+4. Hizmet paketi snapshot'ları ve idempotent kullanım defteri.
+5. İçerik takvimi ve onay geçmişi.
+6. Özel dosyalar, mention ve bildirim tercihleri.
+7. Erişilebilirlik, yük, güvenlik, CI/CD, izleme ve yedekten geri yükleme tatbikatı.
+8. Üretim öncesi ürün sahibi onayı; ücretli kaynak ve public servis ayrı onay gerektirir.

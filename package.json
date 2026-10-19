@@ -13,7 +13,9 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "admin:bootstrap": "tsx --env-file=.env scripts/bootstrap-admin.ts",
-    "db:local": "node --env-file=.env scripts/local-db.mjs"
+    "db:local": "node --env-file=.env scripts/local-db.mjs",
+    "worker": "tsx --env-file=.env scripts/reminders.ts",
+    "test:integration": "node --env-file=.env scripts/test-integration.mjs"
   },
   "keywords": [],
   "author": "",
