@@ -1,6 +1,21 @@
 import type { NextConfig } from 'next';
 const config: NextConfig = {
   serverExternalPackages: ['argon2'],
+  async redirects() {
+    if (process.env.NODE_ENV !== 'development') return [];
+    const base = new URL(
+      process.env.BETTER_AUTH_URL ?? 'http://localhost:3000',
+    );
+    if (base.hostname !== 'localhost') return [];
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host' as const, value: '127\\.0\\.0\\.1' }],
+        destination: `${base.origin}/:path*`,
+        permanent: false,
+      },
+    ];
+  },
   async headers() {
     const developmentEval =
       process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : '';

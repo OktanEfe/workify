@@ -20,3 +20,22 @@ describe('Güvenlik başlıkları', () => {
     ).toContain('unsafe-eval');
   });
 });
+
+describe('Yerel giriş adresi', () => {
+  it('geliştirmede IP adresini auth adresine yönlendirir', async () => {
+    vi.stubEnv('NODE_ENV', 'development');
+    vi.stubEnv('BETTER_AUTH_URL', 'http://localhost:3000');
+    expect(await config.redirects!()).toEqual([
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: '127\\.0\\.0\\.1' }],
+        destination: 'http://localhost:3000/:path*',
+        permanent: false,
+      },
+    ]);
+  });
+  it('üretim adresini localhost adresine yönlendirmez', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    expect(await config.redirects!()).toEqual([]);
+  });
+});

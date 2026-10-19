@@ -34,3 +34,8 @@ Railway/üretim DB, obje depolama, CI/CD, monitoring ve yedekten geri yükleme t
 ## Erişim ve kullanılabilirlik düzeltmesi
 
 Marka ekleme, belirgin düğmeyle `/workspace/brands/new` sayfasına taşındı. Sayfa sunucuda ADMIN kontrolü yapar. Üst çubukta oturum e-postası ve Yönetici/Çalışan rolü görünür. Mobil menü kaydırma yerine satırlara bölünür; çalışan boş durum mesajı marka oluşturmasını istemez. İki gerçek hesapla HTTP kontrollerinde yönetici sayfaları 200, çalışan için marka oluşturma/yapılacaklar/ekip sayfaları 404 verdi. Tarayıcıdan marka kaydı ve çalışan girişi doğrulandı; yalnız geçici kontrol markası temizlendi. Entegrasyon testleri 12/12, tür/lint ve üretim derlemesi başarılı. Codex tarayıcısı ve kişinin diğer tarayıcısı farklı oturum çerezleri kullanabilir; aynı URL farklı hesap menüleri gösterebilir.
+
+
+## Yerel adres ve giriş teşhisi
+
+Geliştirmede 127.0.0.1 istekleri BETTER_AUTH_URL localhost adresine geçici 307 ile yönlendirilir; yol ve sorgu korunur. Üretimde bu kural uygulanmaz. Böylece aynı tarayıcıda IP/hostname arasında ayrı oturum çerezleri oluşması önlenir. Chrome'da 429 geçici giriş limiti doğrudan gözlendi. Giriş formu 429, 403 ve hatalı kimlik bilgisini ayrı mesajlarla gösterir; rate limit kapatılmadı. Marka oluşturma sayfasında çalışan oturumu artık 404 yerine yönetici girişi gerektiğini açıklar; kaydetme servisi ADMIN kontrolünü korur.

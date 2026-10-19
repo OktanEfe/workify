@@ -29,12 +29,16 @@ export function LoginForm() {
             else enter();
           } else {
             const result = await auth.signIn.email({
-              email: String(data.get('email')),
+              email: String(data.get('email')).trim(),
               password: String(data.get('password')),
             });
             if (result.error)
               setError(
-                'Giriş yapılamadı. Bilgilerinizi kontrol edip tekrar deneyin.',
+                result.error.status === 429
+                  ? 'Çok fazla giriş denemesi yapıldı. Bir dakika bekleyip tekrar deneyin.'
+                  : result.error.status === 403
+                    ? 'Giriş adresi doğrulanamadı. Sayfayı localhost:3000/login adresinden açın.'
+                    : 'E-posta veya parola hatalı. Bilgilerinizi kontrol edip tekrar deneyin.',
               );
             else if (result.data && 'twoFactorRedirect' in result.data)
               setChallenge(true);
