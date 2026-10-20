@@ -1,3 +1,4 @@
+import { rescheduleTask, moveTaskDate } from '../../src/services/scheduling';
 import { verify } from 'argon2';
 import { createEmployee } from '../../src/services/staff';
 import {
@@ -511,5 +512,90 @@ suite('PostgreSQL: kurum, görev, özel alan ve audit', () => {
     expect((await db.task.findUniqueOrThrow({ where: { id } })).version).toBe(
       1,
     );
+  });
+  it('çalışan ek görev oluşturur, tarihini ve durumunu değiştirebilir', async () => {
+    const brandId = await assignedBrand();
+    const id = await createTask(employee, {
+      brandId,
+      title: 'Çalışanın ek işi',
+      priority: 'HIGH',
+      startAt: '2026-10-29T10:30',
+      dueAt: '2026-10-30T18:00',
+    });
+    let task = await db.task.findUniqueOrThrow({
+      where: { id },
+      include: { assignments: true },
+    });
+    expect(task.creatorRole).toBe('EMPLOYEE');
+    expect(task.creatorId).toBe(employee.userId);
+    expect(task.assignments[0].membershipId).toBe(employee.membershipId);
+    await moveTaskDate(employee, id, 0, '2026-11-02', 'startAt');
+    task = await db.task.findUniqueOrThrow({
+      where: { id },
+      include: { assignments: true },
+    });
+    expect(localStamp(task.startAt!)).toBe('2026-11-02T10:30');
+    expect(localStamp(task.dueAt!)).toBe('2026-11-03T18:00');
+    await updateTaskStatus(employee, { id, version: 1, status: 'IN_PROGRESS' });
+    await updateTaskStatus(employee, { id, version: 2, status: 'COMPLETED' });
+    await rescheduleTask(employee, id, 3, {
+      startAt: '2026-11-04T09:00',
+      dueAt: '2026-11-05T17:00',
+    });
+    expect((await db.task.findUniqueOrThrow({ where: { id } })).status).toBe(
+      'COMPLETED',
+    );
+    await expect(
+      moveTaskDate(employee, id, 3, '2026-11-06', 'dueAt'),
+    ).rejects.toThrow('Görev değişti');
+  });
+  it('takvimden taşıma başka kurumdan, atanmayan çalışandan ve marka iptalinden korunur', async () => {
+    const brandId = await assignedBrand();
+    const id = await createTask(admin, {
+      brandId,
+      title: 'İzolasyonlu takvim',
+      priority: 'MEDIUM',
+      startAt: '2026-10-22T09:00',
+      dueAt: '2026-10-23T18:00',
+      assignees: [employee.membershipId],
+    });
+    for (const actor of [outsider, unauthorized]) {
+      await expect(
+        moveTaskDate(actor, id, 0, '2026-10-24', 'startAt'),
+      ).rejects.toThrow();
+      await expect(
+        rescheduleTask(actor, id, 0, {
+          startAt: '2026-10-22T10:00',
+          dueAt: '2026-10-23T18:00',
+        }),
+      ).rejects.toThrow();
+    }
+    await setBrandMember(admin, brandId, employee.membershipId, false);
+    await expect(
+      moveTaskDate(employee, id, 0, '2026-10-24', 'startAt'),
+    ).rejects.toThrow();
+    expect((await db.task.findUniqueOrThrow({ where: { id } })).version).toBe(
+      0,
+    );
+  });
+  it('teslim taşınırken başlangıç değişmez ve geçersiz tarih reddedilir', async () => {
+    const brandId = await assignedBrand();
+    const id = await createTask(employee, {
+      brandId,
+      title: 'Teslim taşıma',
+      priority: 'MEDIUM',
+      startAt: '2026-10-22T09:00',
+      dueAt: '2026-10-23T18:00',
+    });
+    await moveTaskDate(employee, id, 0, '2026-10-25', 'dueAt');
+    const task = await db.task.findUniqueOrThrow({ where: { id } });
+    expect(localStamp(task.startAt!)).toBe('2026-10-22T09:00');
+    expect(localStamp(task.dueAt!)).toBe('2026-10-25T18:00');
+    await expect(
+      moveTaskDate(employee, id, 1, '2026-10-21', 'dueAt'),
+    ).rejects.toThrow('başlangıç tarihinden önce');
+    await expect(
+      moveTaskDate(employee, id, 1, '2026-02-30', 'dueAt'),
+    ).rejects.toThrow();
   });
 });

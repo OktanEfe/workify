@@ -2,7 +2,9 @@ import { localStamp, parseLocal } from './dates';
 export function calendarMonth(value?: string, now = new Date()) {
   const fallback = localStamp(now).slice(0, 7);
   const key =
-    value && /^(20[0-9]{2})-(0[1-9]|1[0-2])$/.test(value) ? value : fallback;
+    value && /^(19[0-9]{2}|20[0-9]{2}|21[0-9]{2})-(0[1-9]|1[0-2])$/.test(value)
+      ? value
+      : fallback;
   const [year, month] = key.split('-').map(Number);
   const first = new Date(Date.UTC(year, month - 1, 1));
   const next = new Date(Date.UTC(year, month, 1));

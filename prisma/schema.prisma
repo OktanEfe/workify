@@ -163,6 +163,7 @@ model Task {
  version Int @default(0)
  projectId String?
  creatorId String?
+ creatorRole Role?
  estimatedMinutes Int @default(0)
  completedAt DateTime?
  deletedAt DateTime?

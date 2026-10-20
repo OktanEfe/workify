@@ -18,4 +18,12 @@ describe('İstanbul aylık takvim', () => {
       '2026-10',
     );
   });
+  it('yalnız ekim değil tüm ayları ve sonraki yılı açar', () => {
+    for (let month = 1; month <= 12; month++) {
+      const key = '2027-' + String(month).padStart(2, '0');
+      expect(calendarMonth(key).key).toBe(key);
+      expect(calendarMonth(key).cells.some(Boolean)).toBe(true);
+    }
+    expect(calendarMonth('2100-01').key).toBe('2100-01');
+  });
 });

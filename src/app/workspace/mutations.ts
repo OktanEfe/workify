@@ -7,6 +7,7 @@ import {
   markNotification,
   updateMember,
 } from '@/services/todos';
+import { rescheduleTask, moveTaskDate } from '@/services/scheduling';
 import { updateTaskStatus } from '@/services/tasks';
 import { createEmployee } from '@/services/staff';
 import {
@@ -121,6 +122,21 @@ export async function submitOperation(
           estimatedMinutes: Number(str('estimatedMinutes')),
         });
         break;
+      case 'task-schedule':
+        await rescheduleTask(actor, str('id'), Number(str('version')), {
+          startAt: str('startAt'),
+          dueAt: str('dueAt'),
+        });
+        break;
+      case 'task-date-move':
+        await moveTaskDate(
+          actor,
+          str('id'),
+          Number(str('version')),
+          str('day'),
+          str('field'),
+        );
+        break;
       case 'task-status':
         await updateTaskStatus(actor, {
           id: str('id'),
@@ -211,6 +227,8 @@ export async function submitOperation(
         'Sorumlular aktif marka ekibinden seçilmelidir.',
         'Tarih ve saat geçersiz.',
         'Tarih geçersiz.',
+        'İptal edilen görev planlanamaz.',
+        'Önce göreve tarih ekleyin.',
         'Teslim tarihi başlangıç tarihinden önce olamaz.',
         'Hatırlatma veya tekrarlama için tarih girin.',
         'Kendi yönetici erişiminizi kaldıramazsınız.',

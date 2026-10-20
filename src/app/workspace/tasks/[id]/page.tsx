@@ -97,6 +97,35 @@ export default async function TaskDetail({
           />
         </details>
       )}
+      <details className="panel disclosure">
+        <summary>Çalışma gününü ve tarihleri değiştir</summary>
+        <p>
+          Atandığınız görevin çalışma tarihini güncelleyebilirsiniz. Tüm
+          tarihler İstanbul saatidir.
+        </p>
+        <ActionForm operation="task-schedule" label="Tarihleri kaydet">
+          <input type="hidden" name="id" value={task.id} />
+          <input type="hidden" name="version" value={task.version} />
+          <div className="form-grid">
+            <label>
+              Başlangıç
+              <input
+                name="startAt"
+                type="datetime-local"
+                defaultValue={task.startAt ? localStamp(task.startAt) : ''}
+              />
+            </label>
+            <label>
+              Teslim
+              <input
+                name="dueAt"
+                type="datetime-local"
+                defaultValue={task.dueAt ? localStamp(task.dueAt) : ''}
+              />
+            </label>
+          </div>
+        </ActionForm>
+      </details>
       <div className="dashboard-columns">
         <div>
           <section className="panel">

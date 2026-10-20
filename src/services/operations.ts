@@ -232,6 +232,7 @@ export async function createTask(actor: Actor, input: unknown) {
         brandId: brand.id,
         projectId: data.projectId || null,
         creatorId: fresh.userId,
+        creatorRole: fresh.role,
         title: data.title,
         description: data.description,
         priority: data.priority,
