@@ -1,17 +1,18 @@
-# Dağıtım hazırlığı
+# Canlı yayın — 21 Ekim 2026
 
-Henüz dağıtım yapılmadı. `railway.toml` taslaktır; gerçek Railway ortamında doğrulanmadı. Production için HTTPS `BETTER_AUTH_URL`, en az 32 karakter rastgele `BETTER_AUTH_SECRET`, ayrı PostgreSQL `DATABASE_URL` gerekir. Secret'lar Railway değişkenlerinde tutulmalı, build loglarına yazılmamalı.
+- Uygulama: https://workify-liard.vercel.app
+- GitHub: https://github.com/OktanEfe/workify ; üretim dalı main.
+- Vercel: oktan-efes-projects/workify, Hobby. Ücretli plan açılmadı. Kullanıcıya Hobby ticari kullanım kısıtı bildirildi; kullanıcı mevcut planda kalmayı seçti. Resmi koşullar: https://vercel.com/docs/plans/hobby .
+- PostgreSQL: Vercel Marketplace üzerinden Neon Free (free_v3), Frankfurt. Uzak DB bağlantısı doğrulandı; üç migration uygulandı.
 
-Build: `npm ci && npm run build`. Başlatma: `npm run start`; Next.js Railway `PORT` değişkenini kullanır. Node 22 LTS önerilir.
+İlk aktarımda iki hesap, kurum ve mevcut operasyon verileri boş uzak DB'ye transaction ile kopyalandı ve model sayıları doğrulandı. Parola özetleri ve şifrelenmiş MFA verileri korundu; oturumlar taşınmadı. Yerel DB ve canlı DB bundan sonra bağımsızdır. Canlı kullanıcı verileri üzerinde bu ilk aktarım komutu tekrar çalıştırılmaz; komut hedef boş değilse durur.
 
-Önce staging veritabanında SQL migration ve auth/erişim E2E testleri çalıştırılmalı. Üretimden yedek alıp geri yükleme denendikten ve ürün sahibi onayından sonra `npm run db:deploy` kullanılabilir. Otomatik start komutunda migration yoktur.
+Üretim değişkenleri DATABASE_URL, BETTER_AUTH_URL, BETTER_AUTH_SECRET ve CRON_SECRET Vercel'de saklanır. Secret değerleri ve bağlantı URL'leri repoya yazılmaz. .env, .local, yedekler ve Vercel özel env dosyaları Git/deployment dışında kalır. Mevcut MFA şifreleme anahtarı ilk geçişte korunmuştur. Yönetici MFA kontrolü üretimde açıktır; kullanıcı kurulumunu tamamladı ve uzaktaki twoFactorEnabled=true doğrulandı.
 
-`/api/health` canlılık; `/api/ready` auth ayarları, DB bağlantısı ve Membership tablosuna erişim kontrolüdür. Bu kontrol tüm şema sürümünü garanti etmez. Çalışan readiness olmadan trafik açılmamalı.
+Üretim derlemesi Vercel'de başarılı. /api/health ve /api/ready 200; yönetici ve çalışan girişleri 200; çalışan workspace/calendar/content 200, team 404 olarak doğrulandı. MFA öncesinde yönetici workspace /security adresine yönlendirildi. Yetkisiz cron 401, yetkili cron 200. Kaynak kod main ve geliştirme dalına kullanıcı tarafından gönderildi.
 
-Üretim engelleri: ilk admin/MFA akışlarının gerçek DB doğrulaması, güvenli davet, parola reset teslimatı, audit log, gerçek DB/E2E testleri ve bağımlılık bulgularının giderilmesi.
+Hatırlatmalar: günlük Vercel Cron 06:00 UTC (09:00 İstanbul) ve panel açık/görünürken yöneticinin kendi kayıtları için dakikalık kontrol. Kapalı panelde dakika hassasiyetli bildirim garantisi yoktur. Kaynak: https://vercel.com/docs/cron-jobs/usage-and-pricing .
 
-## Vercel hedefi — 21 Ekim 2026
+Build npm run build. Migration otomatik build içine konulmadı; yeni şema değişiklikleri SQL ve izolasyon testleriyle incelenip yedek alındıktan sonra doğru uzak bağlantıyla uygulanmalıdır. Yerel .env dosyası üretim migration'ına bağlanmak için kullanılmaz. Gelecekteki main gönderimleri Vercel Git entegrasyonuyla dağıtılır; sonucun READY olduğu ve readiness yanıtı ayrıca doğrulanır.
 
-Yeni hedef Vercel'dir; önceki Railway notları geçmiş taslak olarak kalır. Yerel `.local/postgres` üretim veritabanı olarak kullanılamaz. Yayından önce uzak PostgreSQL bağlantısı, HTTPS alan adıyla BETTER_AUTH_URL, özel BETTER_AUTH_SECRET ve veritabanı migration/ilk yönetici/MFA akışı hazırlanıp doğrulanmalıdır. .env ve yerel DB/yedek dosyaları yüklenmez.
-
-Build `npm run build`; framework Next.js. Veritabanı migration'ları build içine otomatik eklenmez. `npm run worker` sürekli süreçtir; Vercel için hatırlatma servisini korumalı bir Function ve Cron zamanlamasına uyarlamak veya ayrı işçi çalıştırmak gerekir. Bu uyarlama henüz uygulanmadı. Resmi kaynaklar: https://vercel.com/docs/cron-jobs/quickstart ve https://vercel.com/docs/cron-jobs/manage-cron-jobs . Alan adı, hesap ve DB seçimi inceleme sonrası netleştirilir. Bu belge dağıtım yapıldığı anlamına gelmez.
+Çalışma zamanı bağımlılık taraması 0 bulgu; 49 birim ve 18 ayrı PostgreSQL entegrasyon testi geçti. Güvenli parola sıfırlama/e-posta teslimatı, kapsamlı yedekten geri yükleme tatbikatı, yük ve erişilebilirlik denetimi henüz tamamlanmadı. Dosya yükleme, müşteri dış onayı ve hizmet paketi modülleri ayrıca geliştirilecek.

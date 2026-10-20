@@ -73,3 +73,8 @@ Vercel hesabı kullanıcı tarafından bağlandı; oktan-efes-projects/workify p
 Vercel Hobby kullanımı kullanıcı tercihidir; resmi Hobby ticari kullanım kısıtı kullanıcıya bildirildi. Ücretli plana geçilmedi. Hatırlatmalar Hobby uyumlu günlük Cron (06:00 UTC) ve yönetici paneli görünürken dakikalık sahip kapsamlı kontrol ile çalışır. Bu, kapalı tarayıcıda dakika hassasiyetli bildirim garantisi değildir. Cron endpoint güçlü CRON_SECRET ile korunur; hatalı yetkilendirme ve scope izolasyonu test edildi.
 
 Kontroller: 49 birim testi, 18 ayrı PostgreSQL entegrasyon testi, lint/tür kontrolü, üretim build başarılı. Çalışma zamanı bağımlılık taramasında 0 bulgu. Bu bölümdeki aşamada GitHub gönderimi ve canlı yayın doğrulaması henüz yapılmak üzeredir; doğrulanınca sonuç ayrıca kaydedilir.
+
+
+## Yayın doğrulaması tamamlandı — 21 Ekim 2026
+
+Vercel üretim yayını READY: https://workify-liard.vercel.app . GitHub main ve codex/agency-operations 2e045eb sürümüne gönderildi. Gerçek uzak DB ile readiness ve iki hesap girişi doğrulandı; çalışan ekranları ve yönetici sayfası engeli test edildi. Kullanıcı yönetici MFA kurulumunu tamamladı; uzaktaki twoFactorEnabled=true ve readiness=200 tekrar doğrulandı. Önceki “henüz yayınlanmadı” notları tarihsel aşamaları anlatır; güncel işletim bilgisi DEPLOYMENT.md içindedir.
