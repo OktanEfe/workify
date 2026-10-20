@@ -12,22 +12,36 @@ export const brandInput = z
       .string()
       .trim()
       .max(200)
+      .default('')
       .transform((v) => v || 'İsimsiz marka'),
     description: optionalText(),
     sector: optionalText(100),
     website: z
-      .union([
-        z.literal(''),
-        z
-          .url()
-          .refine(
-            (v) => /^https?:\/\//.test(v),
-            'Yalnız HTTP/HTTPS bağlantısı girin.',
-          ),
-      ])
-      .default(''),
+      .string()
+      .trim()
+      .max(2000)
+      .default('')
+      .transform((v) =>
+        v && !/^[a-z][a-z0-9+.-]*:/i.test(v) ? `https://${v}` : v,
+      )
+      .pipe(
+        z.union([
+          z.literal(''),
+          z
+            .url()
+            .refine(
+              (v) => /^https?:\/\//i.test(v),
+              'Yalnız HTTP/HTTPS bağlantısı girin.',
+            ),
+        ]),
+      ),
     contactName: optionalText(100),
-    email: z.union([z.literal(''), z.email()]).default(''),
+    email: z
+      .string()
+      .trim()
+      .max(254)
+      .default('')
+      .pipe(z.union([z.literal(''), z.email()])),
     phone: optionalText(50),
   })
   .strict();

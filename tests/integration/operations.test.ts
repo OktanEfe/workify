@@ -11,6 +11,7 @@ import { randomUUID } from 'node:crypto';
 import { db } from '../../src/lib/db';
 import {
   saveBrand,
+  brandInput,
   setBrandMember,
   createTask,
   addComment,
@@ -461,5 +462,22 @@ suite('PostgreSQL: kurum, görev, özel alan ve audit', () => {
     });
     expect(own.remindedAt).not.toBeNull();
     expect(other.remindedAt).toBeNull();
+  });
+  it('markanın web sitesi ve iletişim bilgileri boş veya atlanmış olabilir', async () => {
+    const id = await saveBrand(admin, {
+      name: 'Web sitesi olmayan marka',
+      website: '   ',
+      email: '   ',
+    });
+    const brand = await db.brand.findUniqueOrThrow({ where: { id } });
+    expect(brand.website).toBe('');
+    expect(brand.email).toBe('');
+    expect(brandInput.parse({}).name).toBe('İsimsiz marka');
+    expect(
+      brandInput.parse({ name: 'Web', website: 'www.example.com' }).website,
+    ).toBe('https://www.example.com');
+    expect(() =>
+      brandInput.parse({ website: 'javascript:alert(1)' }),
+    ).toThrow();
   });
 });

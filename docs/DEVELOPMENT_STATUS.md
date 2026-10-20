@@ -78,3 +78,7 @@ Kontroller: 49 birim testi, 18 ayrı PostgreSQL entegrasyon testi, lint/tür kon
 ## Yayın doğrulaması tamamlandı — 21 Ekim 2026
 
 Vercel üretim yayını READY: https://workify-liard.vercel.app . GitHub main ve codex/agency-operations 2e045eb sürümüne gönderildi. Gerçek uzak DB ile readiness ve iki hesap girişi doğrulandı; çalışan ekranları ve yönetici sayfası engeli test edildi. Kullanıcı yönetici MFA kurulumunu tamamladı; uzaktaki twoFactorEnabled=true ve readiness=200 tekrar doğrulandı. Önceki “henüz yayınlanmadı” notları tarihsel aşamaları anlatır; güncel işletim bilgisi DEPLOYMENT.md içindedir.
+
+## Marka formu sadeleştirmesi — 21 Ekim 2026
+
+Web sitesi, iletişim kişisi, e-posta ve telefon kapalı/isteğe bağlı detay bölümüne taşındı. Hiçbir marka alanında required yoktur; boş/atlanmış marka adı varsayılan adla, boş veya yalnız boşluk içeren URL/e-posta boş değerle kaydedilir. Şemasız web adresleri HTTPS ile normalleştirilir; HTTP/HTTPS dışındaki protokoller reddedilir. 19 PostgreSQL entegrasyon testi, lint/tür kontrolü ve build geçti. Bu kaynak güncellemesi yerel Git'e kaydedildi; GitHub gönderimi için Anahtar Zinciri izni yeniden istenmedi. Canlı dağıtım Vercel CLI üzerinden yapılır.
