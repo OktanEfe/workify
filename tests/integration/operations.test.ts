@@ -435,4 +435,31 @@ suite('PostgreSQL: kurum, görev, özel alan ve audit', () => {
       'İçerik değişti',
     );
   });
+  it('oturum yenilemesi yalnız kendi yöneticisinin hatırlatmalarını işler', async () => {
+    const dueAt = localStamp(new Date(Date.now() - 60000));
+    await createTodo(admin, {
+      title: 'Scoped owner',
+      priority: 'MEDIUM',
+      dueAt,
+      reminderMinutes: 0,
+    });
+    await createTodo(admin2, {
+      title: 'Other owner',
+      priority: 'MEDIUM',
+      dueAt,
+      reminderMinutes: 0,
+    });
+    await runReminderBatch(new Date(), {
+      organizationId: admin.organizationId,
+      membershipId: admin.membershipId,
+    });
+    const own = await db.personalTodo.findFirstOrThrow({
+      where: { membershipId: admin.membershipId, title: 'Scoped owner' },
+    });
+    const other = await db.personalTodo.findFirstOrThrow({
+      where: { membershipId: admin2.membershipId, title: 'Other owner' },
+    });
+    expect(own.remindedAt).not.toBeNull();
+    expect(other.remindedAt).toBeNull();
+  });
 });

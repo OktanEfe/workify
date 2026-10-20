@@ -1,9 +1,13 @@
 import { db } from '@/lib/db';
 import { nextOccurrence } from '@/lib/dates';
 import { Prisma } from '@prisma/client';
-export async function runReminderBatch(now = new Date()) {
+export async function runReminderBatch(
+  now = new Date(),
+  scope?: { organizationId: string; membershipId: string },
+) {
   const due = await db.personalTodo.findMany({
     where: {
+      ...scope,
       archived: false,
       completed: false,
       remindAt: { lte: now },
@@ -35,6 +39,7 @@ export async function runReminderBatch(now = new Date()) {
   }
   const recurring = await db.personalTodo.findMany({
     where: {
+      ...scope,
       archived: false,
       dueAt: { lte: now },
       nextSpawnedAt: null,

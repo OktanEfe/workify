@@ -4,7 +4,9 @@ import { db } from '@/lib/db';
 import { taskScope, brandScope } from '@/services/context';
 import { contentScope } from '@/services/content';
 import { calendarMonth } from '@/lib/calendar';
-import { localStamp } from '@/lib/dates';
+import { Kanban } from '@/components/kanban';
+import { taskList } from '@/services/queries';
+import { displayDate, localStamp } from '@/lib/dates';
 export default async function Calendar({
   searchParams,
 }: {
@@ -15,7 +17,7 @@ export default async function Calendar({
   const month = calendarMonth(params.month);
   const range = { gte: month.start, lt: month.end };
   const brandFilter = params.brand ? { brandId: params.brand } : {};
-  const [tasks, contents, todos, brands] = await Promise.all([
+  const [tasks, contents, todos, brands, board] = await Promise.all([
     db.task.findMany({
       where: {
         ...taskScope(actor),
@@ -47,6 +49,7 @@ export default async function Calendar({
         })
       : Promise.resolve([]),
     db.brand.findMany({ where: brandScope(actor), orderBy: { name: 'asc' } }),
+    taskList(actor, { brand: params.brand }),
   ]);
   const events = [
     ...tasks.map((t) => ({
@@ -99,6 +102,31 @@ export default async function Calendar({
           İçerik takibi ↗
         </Link>
       </div>
+      <section className="panel calendar-board-section">
+        <div className="panel-heading">
+          <div>
+            <span className="eyebrow">EKİBİN GÜNLÜK AKIŞI</span>
+            <h2>İş takip panosu</h2>
+            <p>Tarihsiz işler dahil, seçili markadaki son 30 görev.</p>
+          </div>
+          <Link className="button-link" href="/workspace/tasks">
+            Tüm işler ↗
+          </Link>
+        </div>
+        <Kanban
+          tasks={board.items.map((t) => ({
+            id: t.id,
+            title: t.title,
+            brand: t.brand.name,
+            status: t.status,
+            priority: t.priority,
+            version: t.version,
+            position: t.position,
+            due: displayDate(t.dueAt),
+            assignees: t.assignments.map((a) => a.membership.user.name),
+          }))}
+        />
+      </section>
       <section className="panel calendar-surface">
         <div className="calendar-toolbar">
           <Link href={monthLink(month.previous)} aria-label="Önceki ay">

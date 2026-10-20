@@ -32,7 +32,7 @@ export default async function Tasks({
     params.set('page', String(page));
     return '/workspace/tasks?' + params.toString();
   }
-  const board = filters.view === 'board';
+  const board = filters.view !== 'list';
   return (
     <>
       <div className="page-heading">

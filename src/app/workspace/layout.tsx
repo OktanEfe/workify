@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { currentActor } from '@/lib/current-actor';
 import { db } from '@/lib/db';
+import { ReminderSync } from '@/components/reminder-sync';
 import { Navigation } from '@/components/navigation';
 import { SignOut } from './sign-out';
 export const dynamic = 'force-dynamic';
@@ -25,6 +26,7 @@ export default async function WorkspaceLayout({
   ]);
   return (
     <div className="app-shell">
+      {actor.role === 'ADMIN' && <ReminderSync />}
       <aside className="app-sidebar">
         <Link className="app-brand" href="/workspace">
           <b>w</b>workify<span>AGENCY OS</span>

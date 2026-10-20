@@ -1932,3 +1932,388 @@ pre {
     min-height: 70px;
   }
 }
+
+/* Workify: vivid midnight, luminous ivory, and warm gold accents. */
+:root {
+  --ink: #15213d;
+  --muted: #68718c;
+  --green: #304cbd;
+  --paper: #f7f3e8;
+  --line: #e2ddcf;
+}
+.app-shell {
+  background:
+    radial-gradient(ellipse at top right, #e8eaff 0, transparent 45%), #f7f3e8;
+  color: var(--ink);
+}
+.app-sidebar {
+  background: linear-gradient(165deg, #152342 0%, #0d1630 80%);
+  box-shadow: 8px 0 35px #1423480c;
+}
+.app-brand b {
+  background: linear-gradient(135deg, #ffe9a5, #e8c66b);
+  box-shadow: 0 5px 18px #ebca5925;
+  border-radius: 11px;
+}
+.app-sidebar .app-navigation a {
+  padding: 12px 13px;
+  border-radius: 12px;
+  transition:
+    background 0.18s,
+    transform 0.18s;
+}
+.app-sidebar .app-navigation a:hover {
+  transform: translateX(3px);
+  background: #243965;
+}
+.app-sidebar .app-navigation a[aria-current='page'] {
+  background: linear-gradient(100deg, #fff6d9, #f2e6c2);
+  box-shadow: 0 4px 14px #050b1c35;
+  color: #182649;
+}
+.app-topbar {
+  background: #fffdf6ed;
+  backdrop-filter: blur(16px);
+}
+.panel,
+.brand-card,
+.stat-grid > div {
+  border-radius: 18px;
+  border: 1px solid #e5e0d4;
+  box-shadow: 0 5px 24px #192b4f06;
+}
+.page-heading h1 {
+  letter-spacing: -1.4px;
+  font-size: clamp(30px, 3vw, 42px);
+}
+.button-link,
+.action-button {
+  background: linear-gradient(130deg, #263d8e, #3c59ca);
+  box-shadow: 0 5px 15px #304cbd24;
+  border-radius: 10px;
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s;
+}
+.button-link:hover,
+.action-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px #304cbd35;
+}
+.stat-grid > div:nth-child(1) {
+  background: linear-gradient(135deg, #fffdf6, #e8edff);
+  border-top: 3px solid #5e7aed;
+}
+.stat-grid > div:nth-child(2) {
+  background: linear-gradient(135deg, #fffdf6, #f7ecc6);
+  border-top: 3px solid #dbb04a;
+}
+.stat-grid > div:nth-child(3) {
+  background: linear-gradient(135deg, #fffdf6, #f9e5da);
+  border-top: 3px solid #ce916f;
+}
+.stat-grid > div:nth-child(4) {
+  background: linear-gradient(135deg, #fffdf6, #eae5fa);
+  border-top: 3px solid #a494d8;
+}
+.board-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.board-toolbar p {
+  font-size: 12px;
+  color: #70788e;
+  line-height: 1.6;
+  margin: 0;
+}
+.subtle-button {
+  width: auto !important;
+  background: #e9eaf5 !important;
+  color: #30416d !important;
+  padding: 9px 13px !important;
+  font-size: 11px;
+  border: 1px solid #d5d9ef !important;
+  border-radius: 9px !important;
+  white-space: nowrap;
+}
+.kanban-simple {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  overflow: visible;
+}
+.kanban-detailed {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(260px, 1fr);
+  overflow-x: auto;
+  gap: 16px;
+}
+.kanban-lane {
+  border: 1px solid #e3dfd3;
+  border-radius: 15px;
+  padding: 16px;
+  min-width: 0;
+  min-height: 320px;
+  background: #f4f1e9;
+  transition:
+    box-shadow 0.18s,
+    background 0.18s;
+}
+.kanban-lane.lane-planned {
+  background: linear-gradient(180deg, #f7f0d9, #faf7ef);
+  border-top: 3px solid #e2be58;
+}
+.kanban-lane.lane-active {
+  background: linear-gradient(180deg, #e8edff, #f4f5fc);
+  border-top: 3px solid #5878e9;
+}
+.kanban-lane.lane-done {
+  background: linear-gradient(180deg, #ece8fa, #f8f5ff);
+  border-top: 3px solid #9f87d6;
+}
+.kanban-lane.drop-active {
+  box-shadow:
+    inset 0 0 0 2px #5973dc,
+    0 6px 25px #3e5cbe25;
+  background: #e2e9ff;
+}
+.lane-heading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.lane-heading h3 {
+  margin: 0 !important;
+  font-size: 15px;
+  display: block !important;
+}
+.lane-indicator {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #d9af3c;
+  box-shadow: 0 0 0 4px #e9c66222;
+}
+.lane-active .lane-indicator {
+  background: #5573e5;
+  box-shadow: 0 0 0 4px #5573e522;
+}
+.lane-done .lane-indicator {
+  background: #9980c8;
+  box-shadow: 0 0 0 4px #9980c822;
+}
+.lane-count {
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #ffffffb0;
+  min-width: 26px;
+  height: 25px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.lane-description {
+  font-size: 11px;
+  color: #788099;
+  margin: 11px 0 18px;
+}
+.kanban-card {
+  background: #fffef9;
+  border: 1px solid #e5e2dc;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 3px 12px #17223e08;
+  margin-bottom: 12px;
+  cursor: grab;
+  transition:
+    box-shadow 0.18s,
+    transform 0.18s;
+}
+.kanban-card:hover {
+  box-shadow: 0 8px 22px #243f7020;
+  transform: translateY(-2px);
+}
+.kanban-card.is-dragging {
+  opacity: 0.45;
+  transform: rotate(2deg);
+}
+.kanban-card .card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.kanban-card .eyebrow {
+  font-size: 9px;
+  letter-spacing: 1.1px;
+  color: #7c8297;
+}
+.drag-handle {
+  font-size: 20px;
+  color: #9ba2b6;
+}
+.kanban-card .card-title {
+  font-size: 14px;
+  line-height: 1.6;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 12px;
+  color: #1d2c50;
+}
+.kanban-card .priority {
+  display: inline-block;
+  margin-bottom: 12px;
+}
+.kanban-card .card-bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+  border-top: 1px solid #f0ece3;
+  padding-top: 12px;
+  margin-top: 8px;
+}
+.kanban-card small {
+  font-size: 10px;
+  color: #747d93;
+}
+.assignee-stack {
+  display: flex;
+}
+.assignee-stack > span {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #dfe6ff;
+  border: 2px solid #fffdf6;
+  color: #354885;
+  font-size: 10px;
+  font-weight: 700;
+  margin-left: -5px;
+}
+.card-status-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 12px 0 0;
+  font-size: 10px;
+  color: #7d8496;
+}
+.card-status-label select {
+  max-width: 145px;
+  margin: 0;
+  padding: 6px 8px;
+  font-size: 10px;
+  border-radius: 7px;
+  background: #f5f5fa;
+  border-color: #e1e3ed;
+}
+.lane-empty {
+  min-height: 185px;
+  border: 1px dashed #d3d6df;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: #9299ad;
+}
+.lane-empty > span {
+  font-size: 28px;
+  font-weight: 300;
+}
+.lane-empty p {
+  font-size: 12px;
+}
+.cancelled-tasks {
+  margin-top: 18px;
+  color: #727c92;
+  font-size: 12px;
+}
+.cancelled-tasks > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+}
+.cancelled-tasks button {
+  width: auto;
+  padding: 8px 12px;
+  font-size: 11px;
+}
+.calendar-board-section {
+  margin-bottom: 24px;
+}
+@media (max-width: 1000px) {
+  .kanban-simple {
+    grid-template-columns: repeat(3, minmax(235px, 1fr));
+    overflow-x: auto;
+    padding-bottom: 12px;
+  }
+}
+@media (max-width: 760px) {
+  .board-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .kanban-simple {
+    grid-template-columns: 1fr;
+    overflow: visible;
+  }
+  .kanban-lane {
+    min-height: 200px;
+  }
+  .lane-empty {
+    min-height: 90px;
+  }
+  .page-heading h1 {
+    letter-spacing: -0.8px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-sidebar .app-navigation a,
+  .button-link,
+  .action-button,
+  .kanban-card,
+  .kanban-lane {
+    transition: none;
+  }
+  .kanban-card:hover,
+  .button-link:hover,
+  .action-button:hover {
+    transform: none;
+  }
+}
+
+.drag-handle {
+  touch-action: none;
+  cursor: grab;
+  padding: 5px;
+  user-select: none;
+}
+
+.mfa-qr {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #e3dfd3;
+  border-radius: 14px;
+  margin: 18px 0;
+}
+.mfa-key {
+  display: block;
+  overflow-wrap: anywhere;
+  background: #f2eee4;
+  padding: 12px;
+  margin: 12px 0;
+}

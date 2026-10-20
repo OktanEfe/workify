@@ -61,3 +61,15 @@ Kalanlar: güvenli davet/e-posta teslimatı ve parola sıfırlama; zaman takibi;
 `npm run dev` artık önce portu ve DB bağlantısını kontrol eder; erişilebilir mevcut DB'yi kullanır, yerel DB kapalıysa yerel PostgreSQL başlatıcısını çalıştırır. Çocuk süreçlerin temiz kapanışını yönetir; önceden açık DB'yi kapatmaz. Eksik şemayı sessizce migrate etmez, anlaşılır uyarı verir. 3000 doluysa 3001'e sessizce geçmez; mevcut sunucunun adresini gösterir. Açık sunucu korunarak port çakışması davranışı doğrulandı. `npm run dev:web` yalnız Next sunucusunu başlatır. Kullanıcının özel hata mesajı henüz paylaşılmadı; bunun dışında uygulama sayfalarında hata yeniden üretilemedi.
 
 Vercel yayını kullanıcı incelemesinden sonraya bırakıldı; bu aşamada hesap, alan adı veya üretim veritabanı değiştirilmedi.
+
+## İş panosu ve yayın hazırlığı — 21 Ekim 2026
+
+Takvimde ve görevler sayfasında üç sütunlu Yapılacak/Yapılıyor/Yapıldı iş panosu eklendi. Fare ve dokunmatik tutamaçla taşıma; durum menüsüyle klavye alternatifi; ayrıntılı yedi durum görünümü ve iptal edilenleri geri alma vardır. İnceleme/revize kayıtları basit görünümde Yapılıyor altında tutulur. Kartlar mevcut oturum/kurum/marka/atama/sürüm kontrolleri üzerinden kaydedilir. Kalıcı hareketler tarayıcı ve audit/DB ile doğrulandı; sabit kimlikli geçici fixture'lar temizlendi. Liste ve pano aynı filtre ve 30 kayıt sayfalamasını kullanır; takvimdeki pano ay filtresinden bağımsızdır, marka filtresine uyar.
+
+Gece mavisi/fildişi tasarımda canlı mavi, sıcak altın, açık mor tonlar; okunur durum şeritleri, avatarlar, kart gölgeleri ve sürükleme geri bildirimi eklendi. Marka alanları hâlâ tamamen isteğe bağlıdır. MFA kurulumunda QR ve manuel anahtar seçeneği vardır; etkin hesap yeniden kurulum formuna yönlendirilmez.
+
+Vercel hesabı kullanıcı tarafından bağlandı; oktan-efes-projects/workify projesi mevcut OktanEfe/workify GitHub deposuna bağlandı. Neon free_v3/Frankfurt veritabanı açık ücretsiz plan seçilerek oluşturuldu. Üç migration yeni boş uzak DB'ye uygulandı. Mevcut 2 hesap ve 1 kurumun verileri transaction ile ilk kez kopyalandı ve model sayıları doğrulandı. Oturum çerezleri taşınmadı. Var olan şifrelenmiş MFA verileri için uygulamanın mevcut auth anahtarı üretim secret olarak korundu. Secret ve özel yedekler Git/deployment dışında .local içinde kalır.
+
+Vercel Hobby kullanımı kullanıcı tercihidir; resmi Hobby ticari kullanım kısıtı kullanıcıya bildirildi. Ücretli plana geçilmedi. Hatırlatmalar Hobby uyumlu günlük Cron (06:00 UTC) ve yönetici paneli görünürken dakikalık sahip kapsamlı kontrol ile çalışır. Bu, kapalı tarayıcıda dakika hassasiyetli bildirim garantisi değildir. Cron endpoint güçlü CRON_SECRET ile korunur; hatalı yetkilendirme ve scope izolasyonu test edildi.
+
+Kontroller: 49 birim testi, 18 ayrı PostgreSQL entegrasyon testi, lint/tür kontrolü, üretim build başarılı. Çalışma zamanı bağımlılık taramasında 0 bulgu. Bu bölümdeki aşamada GitHub gönderimi ve canlı yayın doğrulaması henüz yapılmak üzeredir; doğrulanınca sonuç ayrıca kaydedilir.

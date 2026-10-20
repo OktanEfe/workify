@@ -1,9 +1,12 @@
 'use client';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { QRCodeSVG } from 'qrcode.react';
 import { createAuthClient } from 'better-auth/react';
 import { twoFactorClient } from 'better-auth/client/plugins';
 const auth = createAuthClient({ plugins: [twoFactorClient()] });
 export function SecurityForm() {
+  const router = useRouter();
   const [setup, setSetup] = useState<{
     totpURI: string;
     backupCodes: string[];
@@ -34,9 +37,9 @@ export function SecurityForm() {
               if (result.error) setMessage('Kod doğrulanamadı.');
               else {
                 setSetup(null);
-                setMessage(
-                  'İki aşamalı doğrulama etkinleştirildi. Çalışma alanına dönebilirsiniz.',
-                );
+                setMessage('İki aşamalı doğrulama etkinleştirildi.');
+                router.replace('/workspace');
+                router.refresh();
               }
             }
           } catch {
@@ -49,14 +52,25 @@ export function SecurityForm() {
         {setup ? (
           <>
             <p>
-              Bu kurulum bağlantısını doğrulayıcı uygulamanıza aktarın. Bağlantı
-              ve yedek kodlar gizlidir.
+              Google Authenticator, Microsoft Authenticator veya benzer bir
+              uygulamayla bu QR kodunu tarayın.
             </p>
-            <textarea
-              aria-label="Doğrulayıcı kurulum bağlantısı"
-              readOnly
-              value={setup.totpURI}
-            />
+            <div className="mfa-qr">
+              <QRCodeSVG
+                value={setup.totpURI}
+                size={210}
+                marginSize={4}
+                level="M"
+                title="Doğrulayıcı kurulum QR kodu"
+              />
+            </div>
+            <details>
+              <summary>QR tarayamıyorsanız manuel kurulum</summary>
+              <p>Tür: Zamana dayalı (TOTP). Kurulum anahtarı:</p>
+              <code className="mfa-key">
+                {new URL(setup.totpURI).searchParams.get('secret')}
+              </code>
+            </details>
             <p>Yedek kodları güvenli bir yerde saklayın:</p>
             <pre>{setup.backupCodes.join('\n')}</pre>
             <label htmlFor="code">Uygulamadaki 6 haneli kod</label>

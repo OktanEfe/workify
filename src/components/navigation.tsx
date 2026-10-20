@@ -13,7 +13,7 @@ const groups = [
   {
     label: 'OPERASYONLAR',
     items: [
-      ['/workspace/tasks', 'Görevler', '▦'],
+      ['/workspace/tasks', 'İş panosu', '▦'],
       ['/workspace/projects', 'Projeler', '▱'],
       ['/workspace/calendar', 'Takvim', '▦'],
       ['/workspace/content', 'İçerik takibi', '▤'],

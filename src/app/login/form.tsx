@@ -37,7 +37,7 @@ export function LoginForm() {
                 result.error.status === 429
                   ? 'Çok fazla giriş denemesi yapıldı. Bir dakika bekleyip tekrar deneyin.'
                   : result.error.status === 403
-                    ? 'Giriş adresi doğrulanamadı. Sayfayı localhost:3000/login adresinden açın.'
+                    ? 'Giriş adresi doğrulanamadı. Bu sitenin giriş sayfasını yenileyip tekrar deneyin.'
                     : 'E-posta veya parola hatalı. Bilgilerinizi kontrol edip tekrar deneyin.',
               );
             else if (result.data && 'twoFactorRedirect' in result.data)
