@@ -2,7 +2,7 @@
   "name": "workify",
   "version": "0.1.0",
   "scripts": {
-    "dev": "next dev --hostname 127.0.0.1",
+    "dev": "node --env-file=.env scripts/dev.mjs",
     "build": "prisma generate && next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
@@ -15,7 +15,8 @@
     "admin:bootstrap": "tsx --env-file=.env scripts/bootstrap-admin.ts",
     "db:local": "node --env-file=.env scripts/local-db.mjs",
     "worker": "tsx --env-file=.env scripts/reminders.ts",
-    "test:integration": "node --env-file=.env scripts/test-integration.mjs"
+    "test:integration": "node --env-file=.env scripts/test-integration.mjs",
+    "dev:web": "next dev --hostname 127.0.0.1 --port 3000"
   },
   "keywords": [],
   "author": "",

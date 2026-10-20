@@ -53,3 +53,11 @@ Geliştirmede 127.0.0.1 istekleri BETTER_AUTH_URL localhost adresine geçici 307
 Doğrulama: 44 birim testi, ayrı PostgreSQL veritabanında 17 entegrasyon testi, lint/tür kontrolü, üretim derlemesi ve Prisma validate geçti. Tarayıcıdan boş marka kaydı ve içerik oluşturma → takvimde 20 Ekim 14:30 görünümü doğrulandı. Yalnız bu UI testinin sabit kimlikli marka/içerik kayıtları temizlendi; mevcut kişisel yapılacaklar korundu. Şema eklendikten sonra geliştirme sunucusu yeni Prisma istemcisiyle yenilendi.
 
 Kalanlar: güvenli davet/e-posta teslimatı ve parola sıfırlama; zaman takibi; dosya yükleme; hizmet paketleri; müşteri dış onayı; sosyal ağ entegrasyonları; rapor dışa aktarma. İlk içerik modülü bu özelliklerin tamamlandığı anlamına gelmez.
+
+## Yerel başlatma düzeltmesi — 21 Ekim 2026
+
+İlk incelemede yerel PostgreSQL ve uygulama sunucusu dinlemiyordu. PostgreSQL başlatıldıktan sonra yönetici girişi ve workspace/team/calendar/content/brands/new sayfaları gerçek HTTP oturumuyla 200 verdi; hata sınırı ekranı görülmedi. Tür kontrolü, lint, 44 birim testi, 17 ayrı PostgreSQL entegrasyon testi, üretim derlemesi ve Prisma validate geçti.
+
+`npm run dev` artık önce portu ve DB bağlantısını kontrol eder; erişilebilir mevcut DB'yi kullanır, yerel DB kapalıysa yerel PostgreSQL başlatıcısını çalıştırır. Çocuk süreçlerin temiz kapanışını yönetir; önceden açık DB'yi kapatmaz. Eksik şemayı sessizce migrate etmez, anlaşılır uyarı verir. 3000 doluysa 3001'e sessizce geçmez; mevcut sunucunun adresini gösterir. Açık sunucu korunarak port çakışması davranışı doğrulandı. `npm run dev:web` yalnız Next sunucusunu başlatır. Kullanıcının özel hata mesajı henüz paylaşılmadı; bunun dışında uygulama sayfalarında hata yeniden üretilemedi.
+
+Vercel yayını kullanıcı incelemesinden sonraya bırakıldı; bu aşamada hesap, alan adı veya üretim veritabanı değiştirilmedi.
