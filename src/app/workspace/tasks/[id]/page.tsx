@@ -89,6 +89,7 @@ export default async function TaskDetail({
               description: task.description,
               projectId: task.projectId ?? '',
               priority: task.priority,
+              startAt: task.startAt ? localStamp(task.startAt) : '',
               dueAt: task.dueAt ? localStamp(task.dueAt) : '',
               estimatedMinutes: task.estimatedMinutes,
               assigneeIds: task.assignments.map((a) => a.membershipId),
@@ -110,6 +111,8 @@ export default async function TaskDetail({
                   .map((a) => a.membership.user.name)
                   .join(', ') || 'Atanmadı'}
               </dd>
+              <dt>Başlangıç</dt>
+              <dd>{displayDate(task.startAt)}</dd>
               <dt>Teslim</dt>
               <dd>{displayDate(task.dueAt)}</dd>
               <dt>Tahmini süre</dt>

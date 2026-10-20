@@ -480,4 +480,36 @@ suite('PostgreSQL: kurum, görev, özel alan ve audit', () => {
       brandInput.parse({ website: 'javascript:alert(1)' }),
     ).toThrow();
   });
+  it('başlangıç ve teslim tarihi görevde kaydedilir ve güvenli düzenlenir', async () => {
+    const brandId = await assignedBrand();
+    const input = {
+      brandId,
+      title: 'Tarihli görev',
+      priority: 'MEDIUM',
+      startAt: '2026-10-22T09:00',
+      dueAt: '2026-10-23T18:00',
+      assignees: [employee.membershipId],
+    };
+    const id = await createTask(admin, input);
+    const task = await db.task.findUniqueOrThrow({ where: { id } });
+    expect(localStamp(task.startAt!)).toBe('2026-10-22T09:00');
+    expect(localStamp(task.dueAt!)).toBe('2026-10-23T18:00');
+    await expect(
+      editTask(outsider, id, 0, { ...input, startAt: '2026-10-22T10:00' }),
+    ).rejects.toThrow();
+    await expect(editTask(employee, id, 0, input)).rejects.toThrow();
+    await editTask(admin, id, 0, { ...input, startAt: '2026-10-22T10:00' });
+    expect(
+      localStamp((await db.task.findUniqueOrThrow({ where: { id } })).startAt!),
+    ).toBe('2026-10-22T10:00');
+    await expect(
+      createTask(admin, { ...input, startAt: '2026-10-24T09:00' }),
+    ).rejects.toThrow('başlangıç tarihinden önce');
+    await expect(
+      editTask(admin, id, 1, { ...input, startAt: '2026-10-24T09:00' }),
+    ).rejects.toThrow('başlangıç tarihinden önce');
+    expect((await db.task.findUniqueOrThrow({ where: { id } })).version).toBe(
+      1,
+    );
+  });
 });

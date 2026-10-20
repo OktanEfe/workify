@@ -54,3 +54,19 @@ export function nextOccurrence(date: Date, recurrence: string) {
   } else throw new Error('Tekrarlama geçersiz.');
   return parseLocal(local.toISOString().slice(0, 16))!;
 }
+
+export function taskDates(startValue: string, dueValue: string) {
+  const startAt = parseLocal(startValue);
+  const dueAt = parseLocal(dueValue);
+  if (startAt && dueAt && startAt > dueAt)
+    throw new Error('Teslim tarihi başlangıç tarihinden önce olamaz.');
+  return { startAt, dueAt };
+}
+export function startFromCalendar(value?: string) {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return '';
+  try {
+    return parseLocal(value + 'T09:00') ? value + 'T09:00' : '';
+  } catch {
+    return '';
+  }
+}

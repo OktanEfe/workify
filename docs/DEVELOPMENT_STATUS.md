@@ -82,3 +82,9 @@ Vercel üretim yayını READY: https://workify-liard.vercel.app . GitHub main ve
 ## Marka formu sadeleştirmesi — 21 Ekim 2026
 
 Web sitesi, iletişim kişisi, e-posta ve telefon kapalı/isteğe bağlı detay bölümüne taşındı. Hiçbir marka alanında required yoktur; boş/atlanmış marka adı varsayılan adla, boş veya yalnız boşluk içeren URL/e-posta boş değerle kaydedilir. Şemasız web adresleri HTTPS ile normalleştirilir; HTTP/HTTPS dışındaki protokoller reddedilir. 19 PostgreSQL entegrasyon testi, lint/tür kontrolü ve build geçti. Bu kaynak güncellemesi yerel Git'e kaydedildi; GitHub gönderimi için Anahtar Zinciri izni yeniden istenmedi. Canlı dağıtım Vercel CLI üzerinden yapılır.
+
+## Başlangıç tarihi ve takvimden iş planlama — 21 Ekim 2026
+
+Task.startAt isteğe bağlı başlangıç zamanı ve kurum/tarih indeksi eklemeli migration ile eklendi. Görev oluşturma/düzenleme formunda başlangıç ve teslim ayrı seçilir; teslim başlangıçtan önce olamaz. Takvim her güne “＋ İş” bağlantısı ve doğrudan tarih seçme formu sunar; seçilen gün görev formunda İstanbul saati 09:00 olarak önceden doldurulur ve değiştirilebilir. Kaydetmeden durum otomatik değiştirilmez. Başlangıç ve teslim ay içindeyse ayrı takvim kayıtları gösterilir; başlangıç tarihi listede, detayda ve pano kartında görünür. Var olan görevlerin startAt değeri null olarak korunur.
+
+51 birim testi, 20 ayrı PostgreSQL entegrasyon testi, lint/tür kontrolü, build ve Prisma validate geçti. Negatif tarih sırası ve başka kurum/çalışanın tarih düzenleme yetkisi test edildi. Üretim güncellemesi için eski DB'nin üzerine yalnız eklemeli tarih migration'ı uygulanır; ilk veri kopyalama betiği tekrar çalıştırılmaz.

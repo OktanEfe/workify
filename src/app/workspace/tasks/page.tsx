@@ -4,7 +4,7 @@ import { taskList, formOptions } from '@/services/queries';
 import { TaskCreate } from '@/components/task-create';
 import { Kanban } from '@/components/kanban';
 import { statuses, priorities } from '@/lib/labels';
-import { displayDate } from '@/lib/dates';
+import { displayDate, startFromCalendar } from '@/lib/dates';
 export default async function Tasks({
   searchParams,
 }: {
@@ -33,6 +33,7 @@ export default async function Tasks({
     return '/workspace/tasks?' + params.toString();
   }
   const board = filters.view !== 'list';
+  const initialStartAt = startFromCalendar(filters.start);
   return (
     <>
       <div className="page-heading">
@@ -47,10 +48,16 @@ export default async function Tasks({
           ＋ Yeni görev
         </a>
       </div>
-      <details className="panel disclosure" id="new">
+      <details
+        className="panel disclosure"
+        id="new"
+        open={filters.new === '1' || !!initialStartAt}
+      >
         <summary>＋ Görev oluştur</summary>
         {options.brands.length ? (
           <TaskCreate
+            initialStartAt={initialStartAt}
+            initialBrandId={filters.brand}
             brands={options.brands.map((b) => ({
               id: b.id,
               name: b.name,
@@ -177,6 +184,7 @@ export default async function Tasks({
               priority: t.priority,
               version: t.version,
               position: t.position,
+              start: t.startAt ? displayDate(t.startAt) : undefined,
               due: displayDate(t.dueAt),
               assignees: t.assignments.map((a) => a.membership.user.name),
             }))}
@@ -191,6 +199,7 @@ export default async function Tasks({
                   <th>Sorumlular</th>
                   <th>Durum</th>
                   <th>Öncelik</th>
+                  <th>Başlangıç</th>
                   <th>Teslim</th>
                 </tr>
               </thead>
@@ -222,6 +231,7 @@ export default async function Tasks({
                         {priorities[task.priority]}
                       </span>
                     </td>
+                    <td>{displayDate(task.startAt)}</td>
                     <td>{displayDate(task.dueAt)}</td>
                   </tr>
                 ))}

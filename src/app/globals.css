@@ -2335,3 +2335,46 @@ pre {
   color: var(--muted);
   line-height: 1.6;
 }
+
+.calendar-day-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.calendar-day-heading time {
+  margin: 0;
+}
+.calendar-add-task {
+  font-size: 10px;
+  color: #304cbd;
+  background: #e8edff;
+  padding: 5px 7px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.calendar-add-task:hover {
+  background: #d6e0ff;
+}
+.calendar-quick-create {
+  padding: 14px;
+  border: 1px dashed #c8d2ec;
+  background: #f4f5fd;
+  border-radius: 10px;
+}
+.calendar-quick-create p {
+  font-size: 11px;
+  color: var(--muted);
+  flex-basis: 100%;
+  margin: 0;
+}
+.calendar-event.task-start {
+  border-color: #4f70cf;
+  background: #e4edff;
+}
+.task-start {
+  display: block !important;
+  color: #304cbd !important;
+  margin-top: 8px;
+}

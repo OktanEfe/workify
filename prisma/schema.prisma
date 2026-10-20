@@ -157,6 +157,7 @@ model Task {
  description String @default("")
  status TaskStatus @default(TODO)
  priority Priority @default(MEDIUM)
+ startAt DateTime?
  dueAt DateTime?
  position Int @default(0)
  version Int @default(0)
@@ -176,6 +177,7 @@ model Task {
  @@unique([organizationId,id])
  @@index([organizationId,brandId,status])
  @@index([organizationId,dueAt])
+ @@index([organizationId,startAt])
 }
 model TaskAssignment {
  organizationId String

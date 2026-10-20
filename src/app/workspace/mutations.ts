@@ -101,6 +101,7 @@ export async function submitOperation(
           projectId: str('projectId'),
           assignees: form.getAll('assignees').map(String),
           priority: str('priority'),
+          startAt: str('startAt'),
           dueAt: str('dueAt'),
           estimatedMinutes: Number(str('estimatedMinutes')),
         });
@@ -115,6 +116,7 @@ export async function submitOperation(
           projectId: str('projectId'),
           assignees: form.getAll('assignees').map(String),
           priority: str('priority'),
+          startAt: str('startAt'),
           dueAt: str('dueAt'),
           estimatedMinutes: Number(str('estimatedMinutes')),
         });
@@ -209,6 +211,7 @@ export async function submitOperation(
         'Sorumlular aktif marka ekibinden seçilmelidir.',
         'Tarih ve saat geçersiz.',
         'Tarih geçersiz.',
+        'Teslim tarihi başlangıç tarihinden önce olamaz.',
         'Hatırlatma veya tekrarlama için tarih girin.',
         'Kendi yönetici erişiminizi kaldıramazsınız.',
         'Son yönetici kaldırılamaz.',

@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
   parseLocal,
+  taskDates,
+  startFromCalendar,
   localStamp,
   dayWindow,
   nextOccurrence,
@@ -38,4 +40,21 @@ describe('İstanbul saatleri', () => {
     expect(
       localStamp(nextOccurrence(parseLocal('2026-10-19T09:00')!, 'WEEKLY')),
     ).toBe('2026-10-26T09:00'));
+});
+
+describe('Görev başlangıç ve teslim tarihleri', () => {
+  it('takvimde seçilen günü İstanbul 09:00 başlangıcıyla doldurur', () => {
+    expect(startFromCalendar('2026-10-22')).toBe('2026-10-22T09:00');
+    expect(startFromCalendar('2026-02-30')).toBe('');
+    expect(startFromCalendar('invalid')).toBe('');
+  });
+  it('tarihleri ayrı kaydeder ve teslimin başlangıçtan önce olmasını engeller', () => {
+    const dates = taskDates('2026-10-22T09:00', '2026-10-23T18:00');
+    expect(dates.startAt?.toISOString()).toBe('2026-10-22T06:00:00.000Z');
+    expect(dates.dueAt?.toISOString()).toBe('2026-10-23T15:00:00.000Z');
+    expect(() => taskDates('2026-10-22T09:00', '2026-10-21T18:00')).toThrow(
+      'başlangıç tarihinden önce',
+    );
+    expect(taskDates('', '')).toEqual({ startAt: null, dueAt: null });
+  });
 });

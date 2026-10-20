@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { db } from '@/lib/db';
 import { AccessDenied, type Actor } from '@/lib/access';
 import { withActor, audit, brandScope, findTask } from './context';
-import { parseLocal } from '@/lib/dates';
+import { parseLocal, taskDates } from '@/lib/dates';
 const text = (max = 200) => z.string().trim().min(1).max(max);
 const optionalText = (max = 5000) => z.string().trim().max(max).default('');
 const id = text(100);
@@ -187,12 +187,14 @@ export const taskInput = z
     projectId: z.string().max(100).default(''),
     assignees: z.array(id).max(30).default([]),
     priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']),
+    startAt: z.string().max(30).default(''),
     dueAt: z.string().max(30).default(''),
     estimatedMinutes: z.number().int().min(0).max(600000).default(0),
   })
   .strict();
 export async function createTask(actor: Actor, input: unknown) {
   const data = taskInput.parse(input);
+  const dates = taskDates(data.startAt, data.dueAt);
   return withActor(actor, async (tx, fresh, name) => {
     const brand = await tx.brand.findFirst({
       where: { ...brandScope(fresh), id: data.brandId, archived: false },
@@ -233,7 +235,7 @@ export async function createTask(actor: Actor, input: unknown) {
         title: data.title,
         description: data.description,
         priority: data.priority,
-        dueAt: parseLocal(data.dueAt),
+        ...dates,
         estimatedMinutes: data.estimatedMinutes,
         assignments: {
           create: assignees.map((membershipId) => ({ membershipId })),
@@ -436,6 +438,7 @@ export async function editTask(
   input: unknown,
 ) {
   const data = taskInput.parse(input);
+  const dates = taskDates(data.startAt, data.dueAt);
   z.number().int().min(0).parse(version);
   return withActor(
     actor,
@@ -471,7 +474,7 @@ export async function editTask(
           description: data.description,
           projectId: data.projectId || null,
           priority: data.priority,
-          dueAt: parseLocal(data.dueAt),
+          ...dates,
           estimatedMinutes: data.estimatedMinutes,
           version: { increment: 1 },
         },

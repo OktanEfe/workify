@@ -22,7 +22,7 @@ export default async function Calendar({
       where: {
         ...taskScope(actor),
         ...brandFilter,
-        dueAt: range,
+        OR: [{ dueAt: range }, { startAt: range }],
         status: { notIn: ['CANCELLED'] },
       },
       include: { brand: true },
@@ -52,15 +52,34 @@ export default async function Calendar({
     taskList(actor, { brand: params.brand }),
   ]);
   const events = [
-    ...tasks.map((t) => ({
-      id: t.id,
-      title: t.title,
-      date: t.dueAt!,
-      href: `/workspace/tasks/${t.id}`,
-      kind: 'task',
-      label: 'Görev',
-      brand: t.brand.name,
-    })),
+    ...tasks.flatMap((t) => [
+      ...(t.startAt && t.startAt >= month.start && t.startAt < month.end
+        ? [
+            {
+              id: t.id,
+              title: t.title,
+              date: t.startAt,
+              href: `/workspace/tasks/${t.id}`,
+              kind: 'task-start',
+              label: 'Başlangıç',
+              brand: t.brand.name,
+            },
+          ]
+        : []),
+      ...(t.dueAt && t.dueAt >= month.start && t.dueAt < month.end
+        ? [
+            {
+              id: t.id,
+              title: t.title,
+              date: t.dueAt,
+              href: `/workspace/tasks/${t.id}`,
+              kind: 'task',
+              label: 'Teslim',
+              brand: t.brand.name,
+            },
+          ]
+        : []),
+    ]),
     ...contents.map((c) => ({
       id: c.id,
       title: c.title,
@@ -94,7 +113,7 @@ export default async function Calendar({
           <span className="eyebrow">İSTANBUL SAATİ · AYLIK PLAN</span>
           <h1>Takvim</h1>
           <p>
-            Görev teslimleri, içerik yayın planları
+            İş başlangıçları, teslimler, içerik yayın planları
             {actor.role === 'ADMIN' ? ' ve kişisel yapılacaklarınız' : ''}.
           </p>
         </div>
@@ -122,6 +141,7 @@ export default async function Calendar({
             priority: t.priority,
             version: t.version,
             position: t.position,
+            start: t.startAt ? displayDate(t.startAt) : undefined,
             due: displayDate(t.dueAt),
             assignees: t.assignments.map((a) => a.membership.user.name),
           }))}
@@ -156,6 +176,24 @@ export default async function Calendar({
           <button>Göster</button>
           <Link href="/workspace/calendar">Bu ay</Link>
         </form>
+        <form
+          action="/workspace/tasks"
+          className="filters calendar-quick-create"
+        >
+          <input type="hidden" name="new" value="1" />
+          {params.brand && (
+            <input type="hidden" name="brand" value={params.brand} />
+          )}
+          <label>
+            Hangi gün başlanacak?
+            <input type="date" name="start" required defaultValue={today} />
+          </label>
+          <button type="submit">＋ Bu güne iş planla</button>
+          <p>
+            Takvimde bir günün “＋ İş” düğmesini de kullanabilirsiniz. Saat ve
+            teslim tarihi görev formunda seçilir.
+          </p>
+        </form>
         <p>{events.length} kayıt · Görev / İçerik / Kişisel</p>
         {(tasks.length === 500 ||
           contents.length === 500 ||
@@ -182,7 +220,24 @@ export default async function Calendar({
               >
                 {key && (
                   <>
-                    <time dateTime={key}>{Number(key.slice(-2))}</time>
+                    <div className="calendar-day-heading">
+                      <time dateTime={key}>{Number(key.slice(-2))}</time>
+                      <Link
+                        className="calendar-add-task"
+                        aria-label={`${key} günü için iş ekle`}
+                        href={
+                          '/workspace/tasks?' +
+                          new URLSearchParams({
+                            start: key,
+                            new: '1',
+                            ...(params.brand ? { brand: params.brand } : {}),
+                          }) +
+                          '#new'
+                        }
+                      >
+                        ＋ İş
+                      </Link>
+                    </div>
                     {entries.map((e) => (
                       <Link
                         className={`calendar-event ${e.kind}`}
@@ -204,7 +259,7 @@ export default async function Calendar({
         </div>
         {!events.length && (
           <p className="empty-state">
-            Bu ay için tarihli kayıt yok. Görevlere teslim tarihi veya
+            Bu ay için tarihli kayıt yok. Görevlere başlangıç/teslim tarihi veya
             içeriklere yayın tarihi eklediğinizde burada görünür.
           </p>
         )}

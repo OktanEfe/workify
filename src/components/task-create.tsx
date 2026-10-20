@@ -8,11 +8,15 @@ export function TaskCreate({
   members,
   admin,
   task,
+  initialStartAt = '',
+  initialBrandId,
 }: {
   brands: { id: string; name: string; memberIds: string[] }[];
   projects: { id: string; brandId: string; name: string }[];
   members: { id: string; name: string }[];
   admin: boolean;
+  initialStartAt?: string;
+  initialBrandId?: string;
   task?: {
     id: string;
     version: number;
@@ -21,12 +25,19 @@ export function TaskCreate({
     description: string;
     projectId: string;
     priority: string;
+    startAt: string;
     dueAt: string;
     estimatedMinutes: number;
     assigneeIds: string[];
   };
 }) {
-  const [brandId, setBrandId] = useState(task?.brandId ?? brands[0]?.id ?? '');
+  const [brandId, setBrandId] = useState(
+    task?.brandId ??
+      (brands.some((b) => b.id === initialBrandId)
+        ? initialBrandId
+        : brands[0]?.id) ??
+      '',
+  );
   const brand = brands.find((b) => b.id === brandId);
   return (
     <ActionForm
@@ -92,6 +103,15 @@ export function TaskCreate({
               </option>
             ))}
           </select>
+        </label>
+        <label>
+          Başlangıç tarihi ve saati
+          <input
+            name="startAt"
+            type="datetime-local"
+            defaultValue={task?.startAt ?? initialStartAt}
+          />
+          <small>Hangi gün başlanacak? İstanbul saati, isteğe bağlı.</small>
         </label>
         <label>
           Teslim tarihi ve saati

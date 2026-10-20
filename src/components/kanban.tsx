@@ -14,6 +14,7 @@ type Card = {
   priority: keyof typeof priorities;
   version: number;
   position: number;
+  start?: string;
   due: string;
   assignees: string[];
 };
@@ -211,6 +212,11 @@ export function Kanban({ tasks }: { tasks: Card[] }) {
                   {!['TODO', 'IN_PROGRESS', 'COMPLETED'].includes(
                     task.status,
                   ) && <small>{statuses[task.status]}</small>}
+                  {task.start && (
+                    <small className="task-start">
+                      ↗ Başlangıç: {task.start}
+                    </small>
+                  )}
                   <div className="card-bottom">
                     <small>◷ {task.due}</small>
                     <span
