@@ -1,8 +1,7 @@
 import Link from 'next/link';
 import { currentActor } from '@/lib/current-actor';
 import { db } from '@/lib/db';
-import { taskScope, brandScope } from '@/services/context';
-import { contentScope } from '@/services/content';
+import { personalTaskScope, brandScope } from '@/services/context';
 import { calendarMonth } from '@/lib/calendar';
 import { Kanban } from '@/components/kanban';
 import { CalendarBoard, type CalendarEvent } from '@/components/calendar-board';
@@ -19,10 +18,10 @@ export default async function Calendar({
   const month = calendarMonth(params.month);
   const range = { gte: month.start, lt: month.end };
   const brandFilter = params.brand ? { brandId: params.brand } : {};
-  const [tasks, contents, todos, brands, board] = await Promise.all([
+  const [tasks, todos, brands, board] = await Promise.all([
     db.task.findMany({
       where: {
-        ...taskScope(actor),
+        ...personalTaskScope(actor),
         ...brandFilter,
         OR: [{ dueAt: range }, { startAt: range }],
         status: { notIn: ['CANCELLED'] },
@@ -36,12 +35,6 @@ export default async function Calendar({
         },
       },
       orderBy: [{ startAt: 'asc' }, { dueAt: 'asc' }],
-      take: 500,
-    }),
-    db.contentItem.findMany({
-      where: { ...contentScope(actor), ...brandFilter, scheduledAt: range },
-      include: { brand: true },
-      orderBy: { scheduledAt: 'asc' },
       take: 500,
     }),
     actor.role === 'ADMIN' && !params.brand
@@ -58,7 +51,7 @@ export default async function Calendar({
         })
       : Promise.resolve([]),
     db.brand.findMany({ where: brandScope(actor), orderBy: { name: 'asc' } }),
-    taskList(actor, { brand: params.brand }),
+    taskList(actor, { brand: params.brand, assignee: actor.membershipId }),
   ]);
   const events: CalendarEvent[] = [];
   for (const task of tasks) {
@@ -83,19 +76,6 @@ export default async function Calendar({
           .join(', '),
       });
     }
-  }
-  for (const item of contents) {
-    if (item.scheduledAt)
-      events.push({
-        id: item.id,
-        title: item.title,
-        day: localStamp(item.scheduledAt).slice(0, 10),
-        time: localStamp(item.scheduledAt).slice(11),
-        href: '/workspace/content?brand=' + item.brandId,
-        kind: 'content',
-        label: 'İçerik',
-        brand: item.brand.name,
-      });
   }
   for (const todo of todos) {
     if (todo.dueAt)
@@ -122,16 +102,24 @@ export default async function Calendar({
     <>
       <div className="page-heading">
         <div>
-          <span className="eyebrow">EKİBİN PLANI · İSTANBUL SAATİ</span>
-          <h1>Takvim ve iş planı</h1>
-          <p>
-            Başlangıçları, teslimleri ve ekibin günlük akışını birlikte yönetin.
-          </p>
+          <span className="eyebrow">KİŞİSEL PLANINIZ · İSTANBUL SAATİ</span>
+          <h1>Takvimim</h1>
+          <p>Yalnızca size atanmış işler ve kişisel hatırlatmalarınız.</p>
         </div>
         <Link className="button-link" href="/workspace/tasks?new=1#new">
           ＋ Görev ekle
         </Link>
       </div>
+      <aside className="personal-calendar-note">
+        <span aria-hidden="true">◷</span>
+        <div>
+          <strong>Bu takvim size özel</strong>
+          <p>
+            Yönetici olsanız da burada yalnızca sorumlusu olduğunuz işler
+            görünür. Ekibin tüm işlerine iş panosundan ulaşabilirsiniz.
+          </p>
+        </div>
+      </aside>
       <section className="calendar-stats" aria-label="Seçili ayın özeti">
         <div>
           <small>Planlanan görev</small>
@@ -201,9 +189,7 @@ export default async function Calendar({
             ekleyebilir. Başlangıç ve teslim ayrıca seçilir.
           </p>
         </form>
-        {(tasks.length === 500 ||
-          contents.length === 500 ||
-          todos.length === 500) && (
+        {(tasks.length === 500 || todos.length === 500) && (
           <p>
             Gösterim sınırına ulaşıldı. Marka filtresiyle daraltın; her kaynakta
             en fazla 500 kayıt gösterilir.
@@ -221,14 +207,14 @@ export default async function Calendar({
         <div className="panel-heading">
           <div>
             <span className="eyebrow">SÜRÜKLE · GÜNCELLE · TAMAMLA</span>
-            <h2>İş takip panosu</h2>
+            <h2>Kişisel iş panom</h2>
             <p>
-              Tarihsiz işler dahil ilk 30 yetkili görev. Kartları kırmızı, sarı
-              ve yeşil sütunlar arasında taşıyın.
+              Tarihsiz işler dahil size atanmış ilk 30 görev. Kartları kırmızı,
+              sarı ve yeşil sütunlar arasında taşıyın.
             </p>
           </div>
           <Link className="button-link" href="/workspace/tasks">
-            Tüm işler ↗
+            İş panosuna git ↗
           </Link>
         </div>
         <Kanban

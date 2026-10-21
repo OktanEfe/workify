@@ -1,6 +1,8 @@
 import { formOptions } from '../../src/services/queries';
 import { rescheduleTask, moveTaskDate } from '../../src/services/scheduling';
-import { verify } from 'argon2';
+import { verify, hash } from 'argon2';
+import { getAuth } from '../../src/lib/auth';
+import { personalTaskScope } from '../../src/services/context';
 import { createEmployee } from '../../src/services/staff';
 import {
   createContent,
@@ -158,6 +160,132 @@ suite('PostgreSQL: kurum, görev, özel alan ve audit', () => {
     expect(
       await db.task.count({ where: { brandId, title: 'Yasak atama' } }),
     ).toBe(0);
+  });
+  it('kişisel takvim yönetici için de yalnız kendi atamalarını gösterir', async () => {
+    const brandId = await assignedBrand();
+    const own = await createTask(admin, {
+      title: 'Kendi işim',
+      brandId,
+      priority: 'MEDIUM',
+      assignees: [admin.membershipId],
+    });
+    const other = await createTask(admin, {
+      title: 'Başkasının işi',
+      brandId,
+      priority: 'MEDIUM',
+      assignees: [employee.membershipId],
+    });
+    const shared = await createTask(admin, {
+      title: 'Ortak iş',
+      brandId,
+      priority: 'MEDIUM',
+      assignees: [admin.membershipId, employee.membershipId],
+    });
+    const visible = (
+      await db.task.findMany({
+        where: { ...personalTaskScope(admin), brandId },
+      })
+    ).map((t) => t.id);
+    expect(visible.sort()).toEqual([own, shared].sort());
+    expect(visible).not.toContain(other);
+    expect(
+      await db.task.count({ where: { ...personalTaskScope(admin2), brandId } }),
+    ).toBe(0);
+    expect(
+      await db.task.count({
+        where: { ...personalTaskScope(outsider), brandId },
+      }),
+    ).toBe(0);
+    await setBrandMember(admin, brandId, employee.membershipId, false);
+    expect(
+      await db.task.count({
+        where: { ...personalTaskScope(employee), brandId },
+      }),
+    ).toBe(0);
+  });
+  it('Better Auth parola değiştirir, eski parolayı reddeder ve diğer oturumları kapatır', async () => {
+    const actor = await member(admin.organizationId, 'EMPLOYEE');
+    const user = await db.user.findUniqueOrThrow({
+      where: { id: actor.userId },
+    });
+    const password = 'Fixture!' + randomUUID();
+    const nextPassword = 'Changed!' + randomUUID();
+    await db.account.create({
+      data: {
+        id: randomUUID(),
+        userId: actor.userId,
+        accountId: actor.userId,
+        providerId: 'credential',
+        password: await hash(password),
+      },
+    });
+    const auth = getAuth();
+    const login = await auth.api.signInEmail({
+      body: { email: user.email, password },
+      returnHeaders: true,
+    });
+    const cookie = login.headers
+      .getSetCookie()
+      .map((v) => v.split(';')[0])
+      .join('; ');
+    const headers = new Headers({ cookie });
+    await db.session.create({
+      data: {
+        id: randomUUID(),
+        token: randomUUID(),
+        userId: actor.userId,
+        expiresAt: new Date(Date.now() + 86400000),
+      },
+    });
+    await expect(
+      auth.api.changePassword({
+        headers,
+        body: {
+          currentPassword: 'incorrect',
+          newPassword: nextPassword,
+          revokeOtherSessions: true,
+        },
+      }),
+    ).rejects.toThrow();
+    await auth.api.changePassword({
+      headers,
+      body: {
+        currentPassword: password,
+        newPassword: nextPassword,
+        revokeOtherSessions: true,
+      },
+    });
+    const account = await db.account.findFirstOrThrow({
+      where: { userId: actor.userId, providerId: 'credential' },
+    });
+    expect(await verify(account.password!, nextPassword)).toBe(true);
+    expect(await verify(account.password!, password)).toBe(false);
+    expect(await db.session.count({ where: { userId: actor.userId } })).toBe(1);
+    const secondLogin = await auth.api.signInEmail({
+      body: { email: user.email, password: nextPassword },
+      returnHeaders: true,
+    });
+    const newHeaders = new Headers({
+      cookie: secondLogin.headers
+        .getSetCookie()
+        .map((v) => v.split(';')[0])
+        .join('; '),
+    });
+    await db.membership.update({
+      where: { id: actor.membershipId },
+      data: { active: false },
+    });
+    await expect(
+      auth.api.changePassword({
+        headers: newHeaders,
+        body: { currentPassword: nextPassword, newPassword: password },
+      }),
+    ).rejects.toThrow();
+    await expect(
+      auth.api.changePassword({
+        body: { currentPassword: nextPassword, newPassword: password },
+      }),
+    ).rejects.toThrow();
   });
   it('çalışan marka oluşturamaz; sahte ADMIN bilgisi güvenilir sayılmaz', async () => {
     await expect(

@@ -106,3 +106,11 @@ Gece mavisi gezinme, fildişi yüzeyler ve canlı mavi aksiyonlarla ortak tasar�
 52 birim testi, 25 ayrı PostgreSQL entegrasyon testi, typecheck, lint, db:validate ve üretim build geçti. Bu aşamada üretim dağıtımı henüz doğrulanmadı; GitHub push manuel kalır.
 
 6abfaf4 sürümü üretime dağıtıldı: dpl_7hCH89LzAVYx4ACuvRcJpHmUDhaJ READY. workify-liard.vercel.app ana alan adı ve /api/ready (HTTP 200, status=ready) doğrulandı. Üretim MFA oturumu gerektiren yönetici ekranı yerine yerel oturumla tasarım kontrolü yapıldı; canlı kullanıcı verisi test için değiştirilmedi.
+
+## Avrasia, kişisel takvim ve parola yönetimi — 21 Ekim 2026
+
+Görünen uygulama adı, oturum açma markası, metadata, Better Auth uygulama adı ve npm paket adı Avrasia oldu. Mevcut depo, hesap e-postaları, oturum anahtarları ve alan adı korundu. Kişisel takvim ve altındaki pano yönetici dahil her rol için yalnız oturum sahibinin atamalarını gösterir; marka yetkisi/kurum scope korunur. Ortak içerik kayıtları kişisel takvimden çıkarıldı; kişisel hatırlatmalar yalnız sahibinde kalır.
+
+Hesap güvenliğine mevcut parola, yeni parola ve tekrar alanları eklendi. Better Auth yerleşik changePassword kullanılır; aktif kurum üyeliği sunucuda doğrulanır, endpoint için dakikada 5 istek sınırı vardır. Diğer oturumlar kapatılır; MFA verileri değiştirilmez. Tarayıcıda kullanıcı parolası değiştirilmedi. Ayrı test DB'de gerçek Better Auth parola değişimi, hatalı eski parola, pasif üye, oturumsuz istek ve diğer oturumların iptali doğrulandı.
+
+52 birim ve 27 PostgreSQL entegrasyon testi, typecheck, lint, db:validate ve üretim build geçti. Yerel takvim ve parola formu tarayıcıda doğrulandı. Bu aşamada GitHub gönderimi ve yeni üretim dağıtımı henüz doğrulanmadı.

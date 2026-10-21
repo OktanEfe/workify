@@ -94,7 +94,6 @@ export function CalendarBoard({
       <div className="calendar-legend">
         <span className="legend-dot manager">Yönetici görevi</span>
         <span className="legend-dot employee">Çalışan görevi</span>
-        <span className="legend-dot content">İçerik</span>
         <span className="legend-dot personal">Kişisel</span>
       </div>
       {message && (

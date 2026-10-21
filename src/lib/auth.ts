@@ -1,4 +1,5 @@
 import { betterAuth } from 'better-auth';
+import { APIError, createAuthMiddleware } from 'better-auth/api';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { twoFactor } from 'better-auth/plugins';
 import { hash, verify, argon2id } from 'argon2';
@@ -11,7 +12,7 @@ function createAuth() {
   if (process.env.NODE_ENV === 'production' && !baseURL.startsWith('https://'))
     throw new Error('HTTPS zorunludur.');
   return betterAuth({
-    appName: 'Workify',
+    appName: 'Avrasia',
     secret,
     baseURL,
     database: prismaAdapter(db, { provider: 'postgresql' }),
@@ -42,11 +43,31 @@ function createAuth() {
       storage: 'database',
       window: 60,
       max: 30,
-      customRules: { '/sign-in/email': { window: 60, max: 5 } },
+      customRules: {
+        '/sign-in/email': { window: 60, max: 5 },
+        '/change-password': { window: 60, max: 5 },
+      },
     },
     advanced: {
       useSecureCookies: process.env.NODE_ENV === 'production',
       defaultCookieAttributes: { httpOnly: true, sameSite: 'lax' },
+    },
+    hooks: {
+      before: createAuthMiddleware(async (ctx) => {
+        if (ctx.path !== '/change-password') return;
+        const session = await getAuth().api.getSession({
+          headers: ctx.headers ?? new Headers(),
+        });
+        if (!session)
+          throw new APIError('UNAUTHORIZED', { message: 'Oturum gerekli.' });
+        const member = await db.membership.findFirst({
+          where: { userId: session.user.id, active: true },
+        });
+        if (!member)
+          throw new APIError('FORBIDDEN', {
+            message: 'Aktif kurum üyeliği gerekli.',
+          });
+      }),
     },
     plugins: [twoFactor()],
   });

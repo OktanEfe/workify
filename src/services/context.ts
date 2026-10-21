@@ -45,6 +45,17 @@ export function taskScope(actor: Actor): Prisma.TaskWhereInput {
       : {}),
   };
 }
+// A personal calendar never inherits an administrator's organization-wide view.
+export function personalTaskScope(actor: Actor): Prisma.TaskWhereInput {
+  return {
+    AND: [
+      taskScope(actor),
+      {
+        assignments: { some: { membershipId: actor.membershipId } },
+      },
+    ],
+  };
+}
 export function brandScope(actor: Actor): Prisma.BrandWhereInput {
   assertOrganization(actor, actor.organizationId);
   return {

@@ -1,3 +1,3 @@
 export function GET() {
-  return Response.json({ status: 'ok', service: 'workify' });
+  return Response.json({ status: 'ok', service: 'avrasia' });
 }

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import './workspace-refresh.css';
 export const metadata: Metadata = {
-  title: 'Workify · Ajans çalışma alanı',
+  title: 'Avrasia · Ajans çalışma alanı',
   description: 'Avrasia Creative ekip çalışma alanı',
   robots: { index: false, follow: false },
 };

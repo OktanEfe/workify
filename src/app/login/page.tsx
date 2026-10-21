@@ -5,7 +5,7 @@ export default function Login() {
     <main className="login">
       <section className="intro">
         <Link className="logo" href="/">
-          w<span>workify</span>
+          a<span>avrasia</span>
         </Link>
         <div>
           <span className="eyebrow">AVRASIA CREATIVE / EKİP ALANI</span>

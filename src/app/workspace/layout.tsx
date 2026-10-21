@@ -29,7 +29,7 @@ export default async function WorkspaceLayout({
       {actor.role === 'ADMIN' && <ReminderSync />}
       <aside className="app-sidebar">
         <Link className="app-brand" href="/workspace">
-          <b>w</b>workify<span>AGENCY OS</span>
+          <b>a</b>avrasia<span>EKİP ÇALIŞMA ALANI</span>
         </Link>
         <div className="organization-switch">
           <span className="organization-icon">A</span>
