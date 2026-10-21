@@ -114,3 +114,5 @@ Görünen uygulama adı, oturum açma markası, metadata, Better Auth uygulama a
 Hesap güvenliğine mevcut parola, yeni parola ve tekrar alanları eklendi. Better Auth yerleşik changePassword kullanılır; aktif kurum üyeliği sunucuda doğrulanır, endpoint için dakikada 5 istek sınırı vardır. Diğer oturumlar kapatılır; MFA verileri değiştirilmez. Tarayıcıda kullanıcı parolası değiştirilmedi. Ayrı test DB'de gerçek Better Auth parola değişimi, hatalı eski parola, pasif üye, oturumsuz istek ve diğer oturumların iptali doğrulandı.
 
 52 birim ve 27 PostgreSQL entegrasyon testi, typecheck, lint, db:validate ve üretim build geçti. Yerel takvim ve parola formu tarayıcıda doğrulandı. Bu aşamada GitHub gönderimi ve yeni üretim dağıtımı henüz doğrulanmadı.
+
+Avrasia güncellemesi da42b71 kaynak commit'iyle üretime dağıtıldı: dpl_D4TSNGTHW24MxZaa3MoYaS4SU6xg READY, ana alan adı workify-liard.vercel.app ve /api/ready HTTP 200 doğrulandı. GitHub gönderimi HTTPS kimlik doğrulaması eksikliği nedeniyle başarısız oldu; tarayıcıyla GitHub yetkilendirmesi hazırlanıyor.
