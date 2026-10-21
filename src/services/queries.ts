@@ -163,7 +163,7 @@ export async function formOptions(actor: Actor) {
         })
       : db.membership.findMany({
           where: {
-            id: actor.membershipId,
+            OR: [{ id: actor.membershipId }, { role: 'ADMIN' }],
             organizationId: actor.organizationId,
             active: true,
           },

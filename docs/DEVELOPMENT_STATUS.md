@@ -96,3 +96,11 @@ Task.startAt isteğe bağlı başlangıç zamanı ve kurum/tarih indeksi eklemel
 52 birim testi ve 23 ayrı PostgreSQL entegrasyon testi, typecheck, lint, build ve db:validate geçti. Yetkisiz kurum, atamasız çalışan, marka erişimi kaldırılmış çalışan, tarih sırası ve eski sürüm olumsuz senaryoları kapsandı. Chrome'da Ekim–Kasım geçişi ve gerçek sürükleme doğrulandı; başlangıç 1→3 Ekim taşındığında teslim 2→4 Ekim kaydı DB'den kontrol edildi, geçici yerel kayıtlar temizlendi. Eklemeli creatorRole migration'ı üretime uygulandı. Bu bölüm yazılırken yeni uygulama dağıtımı henüz doğrulanmadı.
 
 Bu sürüm cd66023 kaynak commit'iyle Vercel üretime dağıtıldı: dpl_GmVvmyAobnJvw5pRFmujTVJCj4iA READY, ana alan adı workify-liard.vercel.app ve /api/ready yanıtı 200/status=ready doğrulandı. GitHub push yapılmadı; kullanıcının macOS Anahtar Zinciri işlemi manuel kalır.
+
+## Arayüz yenileme ve yöneticiye atama — 21 Ekim 2026
+
+Gece mavisi gezinme, fildişi yüzeyler ve canlı mavi aksiyonlarla ortak tasarım katmanı yenilendi: butonlar, formlar, kartlar, tablolar, takvim ve mobil düzenler. Ana sayfaya takvim/atama hızlı erişimi eklendi. Yerel ana ekran tarayıcıda görsel olarak doğrulandı.
+
+Çalışan kendi yetkili markasında oluşturduğu göreve aktif kurum yöneticilerini ekleyebilir; kendisi de atamada kalır. Yöneticiye bildirim gider. Yöneticilerin kurum genelindeki mevcut erişimi gereği ayrıca marka üyeliği aranmaz; çalışan hedefi kendisi veya yönetici ile sınırlıdır. Düzenleme ve yorum bildirimleri aynı yönetici kuralıyla uyumludur. Başka kurum, başka çalışan ve pasif yönetici atamaları transaction içinde reddedilir. Şema değişmedi.
+
+52 birim testi, 25 ayrı PostgreSQL entegrasyon testi, typecheck, lint, db:validate ve üretim build geçti. Bu aşamada üretim dağıtımı henüz doğrulanmadı; GitHub push manuel kalır.

@@ -80,6 +80,7 @@ export default async function TaskDetail({
             members={options.members.map((m) => ({
               id: m.id,
               name: m.user.name,
+              role: m.role,
             }))}
             task={{
               id: task.id,

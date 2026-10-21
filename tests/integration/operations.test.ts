@@ -1,3 +1,4 @@
+import { formOptions } from '../../src/services/queries';
 import { rescheduleTask, moveTaskDate } from '../../src/services/scheduling';
 import { verify } from 'argon2';
 import { createEmployee } from '../../src/services/staff';
@@ -96,6 +97,67 @@ suite('PostgreSQL: kurum, görev, özel alan ve audit', () => {
     await db.organization.deleteMany({ where: { id: { in: orgs } } });
     await db.user.deleteMany({ where: { id: { in: users } } });
     await db.$disconnect();
+  });
+  it('çalışan yöneticisine iş atar, kendi takibi ve yönetici bildirimi korunur', async () => {
+    const brandId = await assignedBrand();
+    const id = await createTask(employee, {
+      title: 'Yönetici onayı',
+      brandId,
+      priority: 'MEDIUM',
+      assignees: [admin2.membershipId],
+    });
+    expect((await formOptions(employee)).members.map((m) => m.id)).toContain(
+      admin2.membershipId,
+    );
+    await editTask(admin, id, 0, {
+      title: 'Yönetici onayı',
+      brandId,
+      priority: 'MEDIUM',
+      assignees: [employee.membershipId, admin2.membershipId],
+    });
+    const assignments = await db.taskAssignment.findMany({
+      where: { taskId: id },
+    });
+    expect(assignments.map((a) => a.membershipId).sort()).toEqual(
+      [employee.membershipId, admin2.membershipId].sort(),
+    );
+    expect(
+      await db.notification.count({
+        where: {
+          membershipId: admin2.membershipId,
+          href: `/workspace/tasks/${id}`,
+        },
+      }),
+    ).toBe(1);
+    expect(
+      await db.task.count({ where: { id, creatorRole: 'EMPLOYEE' } }),
+    ).toBe(1);
+  });
+  it('çalışan başka kuruma, başka çalışana veya pasif yöneticiye iş atayamaz', async () => {
+    const brandId = await assignedBrand();
+    await setBrandMember(admin, brandId, unauthorized.membershipId, true);
+    const inactive = await member(admin.organizationId, 'ADMIN');
+    await db.membership.update({
+      where: { id: inactive.membershipId },
+      data: { active: false },
+    });
+    for (const target of [
+      outsider.membershipId,
+      unauthorized.membershipId,
+      inactive.membershipId,
+    ]) {
+      await expect(
+        createTask(employee, {
+          title: 'Yasak atama',
+          brandId,
+          priority: 'MEDIUM',
+          assignees: [target],
+        }),
+      ).rejects.toThrow();
+    }
+    expect(
+      await db.task.count({ where: { brandId, title: 'Yasak atama' } }),
+    ).toBe(0);
   });
   it('çalışan marka oluşturamaz; sahte ADMIN bilgisi güvenilir sayılmaz', async () => {
     await expect(

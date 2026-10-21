@@ -50,6 +50,27 @@ export default async function Workspace() {
             : '＋ Görev oluştur'}
         </Link>
       </div>
+      <section className="launchpad" aria-label="Hızlı erişim">
+        <div className="launchpad-intro">
+          <strong>İyi işler, birlikte başlar.</strong>
+          <p>
+            Planı netleştirin, ekiple paylaşın, ilerlemeyi aynı yerden takip
+            edin.
+          </p>
+        </div>
+        <Link href="/workspace/calendar">
+          <strong>Takvimi planla ↗</strong>
+          <span>Başlangıçlar ve yaklaşan teslimler</span>
+        </Link>
+        <Link href="/workspace/tasks?new=1#new">
+          <strong>Ekibe iş ata ↗</strong>
+          <span>
+            {actor.role === 'ADMIN'
+              ? 'Sorumluları seç, işi başlat'
+              : 'Yöneticine görev ilet, birlikte takip et'}
+          </span>
+        </Link>
+      </section>
       <section className="stat-grid" aria-label="İş özeti">
         {[
           {

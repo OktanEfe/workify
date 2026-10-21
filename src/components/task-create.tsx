@@ -13,7 +13,7 @@ export function TaskCreate({
 }: {
   brands: { id: string; name: string; memberIds: string[] }[];
   projects: { id: string; brandId: string; name: string }[];
-  members: { id: string; name: string }[];
+  members: { id: string; name: string; role?: string }[];
   admin: boolean;
   initialStartAt?: string;
   initialBrandId?: string;
@@ -134,11 +134,21 @@ export function TaskCreate({
           />
         </label>
         <div>
-          <label>Sorumlular</label>
-          {admin ? (
+          <label>{admin ? 'Sorumlular' : 'Yöneticiye görev ata'}</label>
+          {!admin && (
+            <p className="assignment-hint">
+              Yönetici seçebilirsiniz. Takip edebilmeniz için siz de görevde
+              sorumlu kalırsınız.
+            </p>
+          )}
+          {admin || members.some((m) => m.role === 'ADMIN') ? (
             <div className="checkbox-list">
               {members
-                .filter((m) => brand?.memberIds.includes(m.id))
+                .filter((m) =>
+                  admin
+                    ? m.role === 'ADMIN' || brand?.memberIds.includes(m.id)
+                    : m.role === 'ADMIN',
+                )
                 .map((m) => (
                   <label key={m.id}>
                     <input
@@ -147,7 +157,7 @@ export function TaskCreate({
                       value={m.id}
                       defaultChecked={task?.assigneeIds.includes(m.id) ?? false}
                     />
-                    {m.name}
+                    {m.name} {m.role === 'ADMIN' && <small>Yönetici</small>}
                   </label>
                 ))}
               {!members.some((m) => brand?.memberIds.includes(m.id)) && (

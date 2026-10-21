@@ -1,0 +1,571 @@
+/* Workify: midnight / ivory workspace design system. */
+:root {
+  --ink: #172440;
+  --muted: #64708a;
+  --paper: #f6f7fb;
+  --line: #e2e7f0;
+  --green: #335cff;
+  --surface: #fffefb;
+  --accent: #335cff;
+  --radius: 20px;
+}
+body {
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  font-size: 15px;
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+}
+.app-shell {
+  background: var(--paper);
+}
+.app-sidebar {
+  background: #111d38;
+  border: 0;
+  padding: 32px 20px;
+  box-shadow: 8px 0 40px #1427470a;
+}
+.app-brand {
+  font-size: 29px;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.app-brand b {
+  background: #e9efff;
+  color: #263fc0;
+  border-radius: 12px;
+  width: 38px;
+  height: 38px;
+}
+.app-brand > span {
+  left: 50px;
+  top: 39px;
+  color: #9faed0;
+}
+.organization-switch {
+  border: 1px solid #ffffff14;
+  background: #ffffff06;
+  border-radius: 15px;
+  padding: 14px 12px;
+  margin-bottom: 28px;
+}
+.organization-icon {
+  background: #2a3a60;
+  color: #e8edff;
+  border-radius: 10px;
+}
+.organization-switch strong {
+  color: #fff;
+  font-size: 13px;
+}
+.app-navigation {
+  gap: 20px;
+}
+.nav-group > span {
+  font-size: 10px;
+  color: #8e9dbd;
+  letter-spacing: 1.6px;
+}
+.app-navigation a {
+  font-size: 14px;
+  color: #bfcbe3;
+  padding: 12px 14px;
+  border-radius: 12px;
+  transition:
+    background 0.18s,
+    color 0.18s;
+}
+.app-navigation a:hover {
+  background: #ffffff0a;
+  color: #fff;
+}
+.app-navigation a[aria-current='page'] {
+  background: #e7edff;
+  color: #233bc2;
+  box-shadow: 0 4px 16px #050c251a;
+}
+.app-navigation a[aria-current='page'] i {
+  color: #335cff;
+}
+.sidebar-profile {
+  border-top: 1px solid #ffffff18;
+  padding-top: 20px;
+}
+.sidebar-profile strong {
+  color: #f5f7ff;
+}
+.sidebar-bottom a {
+  color: #c5cfe4;
+}
+.app-topbar {
+  background: #fffefbe8;
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--line);
+  min-height: 82px;
+  gap: 22px;
+  padding: 18px 36px;
+}
+.top-search {
+  width: min(320px, 30vw);
+}
+.top-search input {
+  background: #f2f5fa;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 12px 38px 12px 16px;
+  font-size: 14px;
+}
+.top-search input:focus {
+  border-color: var(--accent);
+}
+.top-search button {
+  box-shadow: none !important;
+}
+.session-identity strong {
+  color: var(--ink);
+}
+.app-main {
+  max-width: 1680px;
+  padding: 40px 38px 72px;
+  background: none;
+}
+.page-heading {
+  padding: 8px 0 22px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--line);
+}
+.page-heading h1 {
+  font-size: clamp(30px, 3vw, 44px);
+  font-weight: 750;
+  letter-spacing: -1.6px;
+}
+.page-heading p {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.page-heading .eyebrow {
+  font-size: 11px;
+  color: #6478a0;
+  letter-spacing: 1.8px;
+}
+button,
+.button-link,
+.subtle-button {
+  border-radius: 12px;
+  min-height: 44px;
+  font-size: 14px;
+  font-weight: 650;
+  transition:
+    background 0.18s,
+    box-shadow 0.18s,
+    transform 0.18s;
+}
+.button-link,
+button[type='submit'] {
+  background: #335cff;
+  color: #fff;
+  box-shadow: 0 5px 14px #335cff22;
+  padding: 13px 20px;
+}
+.button-link:hover,
+button[type='submit']:hover {
+  background: #284ce0;
+  box-shadow: 0 8px 20px #335cff30;
+  transform: translateY(-1px);
+}
+.button-link.secondary,
+.subtle-button {
+  background: #edf1fa;
+  color: #354777;
+  border: 1px solid #dce3f1;
+  box-shadow: none;
+}
+.panel-heading .button-link {
+  color: #fff;
+}
+.view-switch a {
+  border-radius: 9px;
+  padding: 10px 16px;
+}
+.view-switch a[aria-current='page'] {
+  background: #e7edff;
+  color: #284bda;
+}
+.panel,
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 22px #13244c04;
+  background-image: none;
+}
+.panel {
+  padding: 26px;
+  margin-bottom: 24px;
+}
+.panel h2 {
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+.panel-heading {
+  gap: 18px;
+  margin-bottom: 22px;
+}
+.panel-heading p {
+  font-size: 14px;
+}
+.stat-grid {
+  gap: 18px;
+}
+.stat-card {
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid var(--line);
+}
+.stat-card:after {
+  content: '';
+  position: absolute;
+  width: 88px;
+  height: 88px;
+  right: -24px;
+  top: -25px;
+  border-radius: 50%;
+  background: #335cff0b;
+}
+.stat-card > span {
+  font-size: 14px;
+  color: #64708a;
+}
+.stat-card > strong {
+  font-size: 40px;
+  font-weight: 750;
+  letter-spacing: -1.8px;
+  color: #243c82;
+}
+.stat-card.warning > strong {
+  color: #d34c57;
+}
+.stat-card.positive > strong {
+  color: #148269;
+}
+.stat-card small {
+  font-size: 13px;
+}
+input,
+textarea,
+select {
+  background: #fcfdff;
+  color: var(--ink);
+  border: 1px solid #dce3ef;
+  border-radius: 11px;
+  font-size: 15px;
+  padding: 12px 14px;
+  min-height: 44px;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid #335cff55;
+  border-color: #335cff;
+  outline-offset: 2px;
+}
+input[type='checkbox'] {
+  min-height: auto;
+  accent-color: #335cff;
+}
+label {
+  font-size: 14px;
+  color: #35435f;
+}
+.form-grid {
+  gap: 22px;
+}
+.checkbox-list {
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: #f6f8fc;
+  padding: 12px;
+}
+.checkbox-list label {
+  padding: 9px;
+  gap: 10px;
+}
+.checkbox-list small {
+  margin-left: auto;
+  background: #e4ebff;
+  color: #334eab;
+  padding: 3px 8px;
+  border-radius: 7px;
+}
+.assignment-hint {
+  font-size: 13px;
+  line-height: 1.6;
+}
+.disclosure > summary {
+  font-size: 16px;
+  font-weight: 650;
+  padding: 5px 0;
+}
+.kanban {
+  gap: 18px;
+}
+.kanban-lane {
+  border-radius: 17px;
+  border: 1px solid #e1e6f0;
+  background: #edf1f7;
+}
+.kanban-lane h3 {
+  font-size: 17px;
+}
+.kanban-card {
+  border-radius: 13px;
+  box-shadow: 0 3px 10px #152b4905;
+  border: 1px solid #e0e5ef;
+}
+.kanban-card strong {
+  font-size: 16px;
+  line-height: 1.5;
+}
+.kanban-lane[data-status='TODO'] {
+  background: #fff1f1;
+  border-color: #f1d5d8;
+}
+.kanban-lane[data-status='IN_PROGRESS'] {
+  background: #fff9e8;
+  border-color: #f0e1b9;
+}
+.kanban-lane[data-status='COMPLETED'] {
+  background: #eaf8f1;
+  border-color: #c8e7d7;
+}
+.month-navigation {
+  padding: 8px 0 22px;
+}
+.month-selectors select {
+  background: #f1f4fc;
+  border: 1px solid #e1e7f2;
+  border-radius: 12px;
+  font-size: 22px;
+}
+.calendar-day {
+  background: #fffefb;
+  border-color: #e5eaf2;
+  min-height: 185px;
+}
+.calendar-day.today {
+  background: #eef2ff;
+}
+.calendar-event {
+  border-radius: 11px;
+  border-left-width: 4px;
+  padding: 11px;
+  background: #edf1ff;
+}
+.calendar-event.employee-event {
+  background: #e6f6f4;
+}
+.calendar-event strong {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.calendar-day-header button {
+  font-size: 15px;
+}
+.calendar-stats {
+  gap: 16px;
+}
+.day-agenda {
+  background: #f5f7fd;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  padding: 22px;
+}
+.launchpad {
+  display: grid;
+  grid-template-columns: 1.5fr repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 26px;
+}
+.launchpad-intro {
+  padding: 22px 26px;
+  border-radius: 18px;
+  background: #1b2c54;
+  color: #fff;
+}
+.launchpad-intro strong {
+  display: block;
+  font-size: 20px;
+  letter-spacing: -0.4px;
+}
+.launchpad-intro p {
+  color: #c1cde6;
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.launchpad > a {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  background: #fffefb;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 22px 26px;
+  transition:
+    border-color 0.2s,
+    transform 0.2s;
+}
+.launchpad > a:hover {
+  border-color: #9eaff8;
+  transform: translateY(-2px);
+}
+.launchpad > a strong {
+  font-size: 17px;
+}
+.launchpad > a span {
+  color: var(--muted);
+  font-size: 14px;
+}
+.login .intro {
+  background: #111d38;
+  color: #fff;
+}
+.intro h1 {
+  color: #fff;
+  letter-spacing: -2px;
+}
+.intro p {
+  color: #c1cbe0;
+}
+.login .intro .logo span,
+.login .intro .eyebrow {
+  color: #dce5ff;
+}
+.login form {
+  border-radius: 22px;
+}
+.login input {
+  background: #f6f8fc;
+}
+.login .intro .logo {
+  color: #e6d69d;
+}
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+th {
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  background: #f5f7fc;
+  color: #697795;
+}
+td {
+  font-size: 14px;
+  padding-top: 17px;
+  padding-bottom: 17px;
+}
+tr:hover td {
+  background: #f7f9ff;
+}
+.status-badge {
+  border-radius: 7px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 650;
+}
+@media (min-width: 1100px) {
+  .dashboard-columns {
+    grid-template-columns: minmax(0, 1.65fr) minmax(300px, 1fr);
+  }
+}
+@media (max-width: 900px) {
+  .app-main {
+    padding: 26px 20px 50px;
+  }
+  .app-topbar {
+    padding: 16px 20px;
+  }
+  .launchpad {
+    grid-template-columns: 1fr 1fr;
+  }
+  .launchpad-intro {
+    grid-column: 1/-1;
+  }
+  .panel {
+    padding: 20px;
+  }
+  .session-identity {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
+  .app-sidebar {
+    padding: 20px 14px;
+  }
+  .app-topbar {
+    gap: 12px;
+  }
+  .top-search {
+    width: 100%;
+    margin-left: 0;
+  }
+  .launchpad {
+    grid-template-columns: 1fr;
+  }
+  .launchpad-intro {
+    grid-column: auto;
+  }
+  .page-heading {
+    align-items: flex-start;
+  }
+  .page-heading .button-link {
+    white-space: normal;
+  }
+  .stat-card {
+    padding: 18px;
+  }
+  .stat-card > strong {
+    font-size: 34px;
+  }
+  .panel {
+    border-radius: 16px;
+    padding: 16px;
+  }
+  .month-selectors select {
+    font-size: 18px;
+  }
+  .app-main {
+    padding: 24px 14px 48px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *:before,
+  *:after {
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+.app-shell .app-navigation a[aria-current='page'] {
+  background: #e7edff;
+  background-image: none;
+  color: #233bc2;
+  box-shadow: 0 4px 16px #050c251a;
+}
+.app-shell .top-search button[type='submit'] {
+  background: transparent;
+  color: #64708a;
+  padding: 10px;
+  min-height: 40px;
+  box-shadow: none;
+  transform: none;
+}

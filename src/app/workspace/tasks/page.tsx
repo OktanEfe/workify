@@ -71,6 +71,7 @@ export default async function Tasks({
             members={options.members.map((m) => ({
               id: m.id,
               name: m.user.name,
+              role: m.role,
             }))}
             admin={actor.role === 'ADMIN'}
           />

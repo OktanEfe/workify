@@ -213,7 +213,9 @@ export async function createTask(actor: Actor, input: unknown) {
       throw new AccessDenied();
     const assignees = [
       ...new Set(
-        fresh.role === 'ADMIN' ? data.assignees : [fresh.membershipId],
+        fresh.role === 'ADMIN'
+          ? data.assignees
+          : [fresh.membershipId, ...data.assignees],
       ),
     ];
     const members = await tx.membership.findMany({
@@ -221,9 +223,14 @@ export async function createTask(actor: Actor, input: unknown) {
         id: { in: assignees },
         organizationId: fresh.organizationId,
         active: true,
-        brands: { some: { brandId: brand.id } },
+        OR: [{ role: 'ADMIN' }, { brands: { some: { brandId: brand.id } } }],
       },
     });
+    if (
+      fresh.role !== 'ADMIN' &&
+      members.some((m) => m.id !== fresh.membershipId && m.role !== 'ADMIN')
+    )
+      throw new AccessDenied();
     if (members.length !== assignees.length)
       throw new Error('Sorumlular aktif marka ekibinden seçilmelidir.');
     const task = await tx.task.create({
@@ -310,7 +317,10 @@ export async function addComment(actor: Actor, taskId: string, body: string) {
           where: {
             id: assignee.membershipId,
             active: true,
-            brands: { some: { brandId: task.brandId } },
+            OR: [
+              { role: 'ADMIN' },
+              { brands: { some: { brandId: task.brandId } } },
+            ],
           },
         });
         if (member?.active)
@@ -463,7 +473,10 @@ export async function editTask(
           organizationId: fresh.organizationId,
           id: { in: assignees },
           active: true,
-          brands: { some: { brandId: task.brandId } },
+          OR: [
+            { role: 'ADMIN' },
+            { brands: { some: { brandId: task.brandId } } },
+          ],
         },
       });
       if (members.length !== assignees.length)
