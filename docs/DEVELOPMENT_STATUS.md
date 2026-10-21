@@ -104,3 +104,5 @@ Gece mavisi gezinme, fildişi yüzeyler ve canlı mavi aksiyonlarla ortak tasar�
 Çalışan kendi yetkili markasında oluşturduğu göreve aktif kurum yöneticilerini ekleyebilir; kendisi de atamada kalır. Yöneticiye bildirim gider. Yöneticilerin kurum genelindeki mevcut erişimi gereği ayrıca marka üyeliği aranmaz; çalışan hedefi kendisi veya yönetici ile sınırlıdır. Düzenleme ve yorum bildirimleri aynı yönetici kuralıyla uyumludur. Başka kurum, başka çalışan ve pasif yönetici atamaları transaction içinde reddedilir. Şema değişmedi.
 
 52 birim testi, 25 ayrı PostgreSQL entegrasyon testi, typecheck, lint, db:validate ve üretim build geçti. Bu aşamada üretim dağıtımı henüz doğrulanmadı; GitHub push manuel kalır.
+
+6abfaf4 sürümü üretime dağıtıldı: dpl_7hCH89LzAVYx4ACuvRcJpHmUDhaJ READY. workify-liard.vercel.app ana alan adı ve /api/ready (HTTP 200, status=ready) doğrulandı. Üretim MFA oturumu gerektiren yönetici ekranı yerine yerel oturumla tasarım kontrolü yapıldı; canlı kullanıcı verisi test için değiştirilmedi.
