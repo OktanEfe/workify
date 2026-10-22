@@ -16,3 +16,7 @@ Hatırlatmalar: günlük Vercel Cron 06:00 UTC (09:00 İstanbul) ve panel açık
 Build npm run build. Migration otomatik build içine konulmadı; yeni şema değişiklikleri SQL ve izolasyon testleriyle incelenip yedek alındıktan sonra doğru uzak bağlantıyla uygulanmalıdır. Yerel .env dosyası üretim migration'ına bağlanmak için kullanılmaz. Gelecekteki main gönderimleri Vercel Git entegrasyonuyla dağıtılır; sonucun READY olduğu ve readiness yanıtı ayrıca doğrulanır.
 
 Çalışma zamanı bağımlılık taraması 0 bulgu; 49 birim ve 18 ayrı PostgreSQL entegrasyon testi geçti. Güvenli parola sıfırlama/e-posta teslimatı, kapsamlı yedekten geri yükleme tatbikatı, yük ve erişilebilirlik denetimi henüz tamamlanmadı. Dosya yükleme, müşteri dış onayı ve hizmet paketi modülleri ayrıca geliştirilecek.
+
+### İçerik stüdyosu arama bağlantısı
+
+`TAVILY_API_KEY` yalnız sunucu Production ortamında tutulur; `NEXT_PUBLIC_` ile paylaşılmaz. Sağlayıcı kapalı veya kotası bittiğinde arşiv örnekleri ve kurallı üretim taslakları çalışır. Yeni anahtar/ortam değişikliği dağıtım gerektirir. Ücretli plan veya otomatik aşım açılmadı. Kurum başına son 24 saatte 20 arama ve kişi başına dakikada 3 arama sınırı DB'dedir; referans okuma seçeneği ek sağlayıcı kredisi kullanabilir. Yeni referans/imza alanları için `20261022010000_content_inspiration` migration'ı gerekir. İlk veri taşıma betiği tekrar çalıştırılmaz.

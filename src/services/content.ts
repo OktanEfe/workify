@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { db } from '@/lib/db';
 import { AccessDenied, type Actor } from '@/lib/access';
 import { withActor, audit, brandScope } from './context';
+import { referenceLinks } from '@/lib/content-ideas';
 import { parseLocal } from '@/lib/dates';
 export const contentStatuses = {
   DRAFT: 'Taslak',
@@ -25,6 +26,7 @@ export const contentInput = z.object({
   format: z.enum(['Gönderi', 'Reels', 'Story', 'Video', 'Yazı']),
   body: z.string().trim().max(10000).default(''),
   scheduledAt: z.string().default(''),
+  referenceLinks,
 });
 export async function createContent(actor: Actor, input: unknown) {
   const data = contentInput.parse(input);

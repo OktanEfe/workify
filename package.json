@@ -30,6 +30,7 @@
     "qrcode.react": "^4.2.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
+    "read-excel-file": "^9.3.12",
     "zod": "^4.6.7"
   },
   "private": true,

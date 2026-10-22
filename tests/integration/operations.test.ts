@@ -10,7 +10,12 @@ import {
   listContent,
   editContent,
 } from '../../src/services/content';
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+import {
+  importContentIdeas,
+  inspirationSource,
+  searchWebExamples,
+} from '../../src/services/content-inspiration';
 import { randomUUID } from 'node:crypto';
 import { db } from '../../src/lib/db';
 import {
@@ -286,6 +291,178 @@ suite('PostgreSQL: kurum, görev, özel alan ve audit', () => {
         body: { currentPassword: nextPassword, newPassword: password },
       }),
     ).rejects.toThrow();
+  });
+  it('Excel fikirleri atomik, marka kapsamlı ve tekrar aktarıma dayanıklıdır', async () => {
+    const brandId = await assignedBrand();
+    const row = {
+      title: 'Excel fikri',
+      body: 'Kahve demleme',
+      channel: 'Instagram',
+      format: 'Reels',
+      referenceLinks: ['https://example.com/coffee'],
+    };
+    expect(
+      await importContentIdeas(admin, { brandId, rows: [row, row] }),
+    ).toEqual({ inserted: 1, skipped: 1 });
+    expect(await importContentIdeas(admin, { brandId, rows: [row] })).toEqual({
+      inserted: 0,
+      skipped: 1,
+    });
+    await expect(
+      importContentIdeas(outsider, { brandId, rows: [row] }),
+    ).rejects.toThrow();
+    await expect(
+      importContentIdeas(employee, { brandId, rows: [row] }),
+    ).rejects.toThrow();
+    await expect(
+      importContentIdeas(
+        { ...employee, role: 'ADMIN' },
+        { brandId, rows: [row] },
+      ),
+    ).rejects.toThrow();
+    await expect(
+      importContentIdeas(admin, {
+        brandId,
+        rows: [
+          { ...row, title: 'Geçerli' },
+          { ...row, referenceLinks: ['javascript:alert(1)'] },
+        ],
+      }),
+    ).rejects.toThrow();
+    expect(await db.contentItem.count({ where: { brandId } })).toBe(1);
+    const item = await db.contentItem.findFirstOrThrow({ where: { brandId } });
+    expect((await inspirationSource(employee, item.id)).referenceLinks).toEqual(
+      row.referenceLinks,
+    );
+    await expect(inspirationSource(outsider, item.id)).rejects.toThrow();
+    await setBrandMember(admin, brandId, employee.membershipId, false);
+    await expect(inspirationSource(employee, item.id)).rejects.toThrow();
+  });
+  it('web önerisi yetki, sonuç doğrulama ve kalıcı kota kontrollerinden geçer', async () => {
+    const brandId = await assignedBrand();
+    const id = await createContent(admin, {
+      title: 'Kahve örnekleri',
+      brandId,
+      channel: 'Instagram',
+      format: 'Reels',
+    });
+    const old = process.env.TAVILY_API_KEY;
+    delete process.env.TAVILY_API_KEY;
+    expect(
+      (await searchWebExamples(employee, id, 'Kahve demleme')).configured,
+    ).toBe(false);
+    await expect(
+      searchWebExamples(outsider, id, 'Kahve demleme'),
+    ).rejects.toThrow();
+    process.env.TAVILY_API_KEY = 'test-only-key';
+    const mocked = vi.spyOn(globalThis, 'fetch').mockImplementation(
+      async () =>
+        new Response(
+          JSON.stringify({
+            results: [
+              {
+                title: 'Kahve',
+                url: 'https://example.com/coffee',
+                content: 'Örnek çekim akışı',
+              },
+              { title: 'Yasak', url: 'javascript:alert(1)' },
+              { title: 'Tekrar', url: 'https://example.com/coffee' },
+            ],
+          }),
+        ),
+    );
+    try {
+      const result = await searchWebExamples(employee, id, 'Kahve demleme');
+      expect(result.results).toHaveLength(1);
+      expect(mocked.mock.calls[0][0]).toBe('https://api.tavily.com/search');
+      expect(JSON.parse(String(mocked.mock.calls[0][1]?.body)).query).toBe(
+        'Kahve demleme Instagram Reels içerik örnekleri',
+      );
+      await searchWebExamples(employee, id, 'Kahve demleme');
+      await searchWebExamples(employee, id, 'Kahve demleme');
+      await expect(
+        searchWebExamples(employee, id, 'Kahve demleme'),
+      ).rejects.toThrow('Arama sınırına');
+      await setBrandMember(admin, brandId, employee.membershipId, false);
+      await expect(
+        searchWebExamples(employee, id, 'Kahve demleme'),
+      ).rejects.toThrow();
+    } finally {
+      mocked.mockRestore();
+      if (old === undefined) delete process.env.TAVILY_API_KEY;
+      else process.env.TAVILY_API_KEY = old;
+      await db.rateLimit.deleteMany({
+        where: {
+          OR: orgs.map((organizationId) => ({
+            key: { contains: organizationId },
+          })),
+        },
+      });
+    }
+  });
+  it('örnek link metinlerini yalnız istenirse okuyup arama konusunu genişletir', async () => {
+    const actor = await member(admin.organizationId, 'ADMIN');
+    const brandId = await assignedBrand();
+    const url = 'https://example.com/espresso';
+    const id = await createContent(admin, {
+      title: 'Kahve',
+      brandId,
+      channel: 'Instagram',
+      format: 'Reels',
+      referenceLinks: [url],
+    });
+    const previous = process.env.TAVILY_API_KEY;
+    process.env.TAVILY_API_KEY = 'test-only-key';
+    const mocked = vi
+      .spyOn(globalThis, 'fetch')
+      .mockImplementation(
+        async (input) =>
+          new Response(
+            JSON.stringify(
+              String(input).endsWith('/extract')
+                ? {
+                    results: [
+                      { url, raw_content: 'Espresso çekirdek öğütme ipuçları' },
+                    ],
+                  }
+                : {
+                    results: [
+                      {
+                        title: 'Demleme',
+                        url: 'https://example.com/new',
+                        content: 'Yeni örnek',
+                      },
+                    ],
+                  },
+            ),
+          ),
+      );
+    try {
+      const result = await searchWebExamples(
+        actor,
+        id,
+        'Kahve örnekleri',
+        true,
+      );
+      expect(mocked).toHaveBeenCalledTimes(2);
+      expect('analysis' in result && result.analysis?.[0]).toContain(
+        'espresso',
+      );
+      expect(JSON.parse(String(mocked.mock.calls[1][1]?.body)).query).toContain(
+        'espresso',
+      );
+    } finally {
+      mocked.mockRestore();
+      if (previous === undefined) delete process.env.TAVILY_API_KEY;
+      else process.env.TAVILY_API_KEY = previous;
+      await db.rateLimit.deleteMany({
+        where: {
+          OR: orgs.map((organizationId) => ({
+            key: { contains: organizationId },
+          })),
+        },
+      });
+    }
   });
   it('çalışan marka oluşturamaz; sahte ADMIN bilgisi güvenilir sayılmaz', async () => {
     await expect(

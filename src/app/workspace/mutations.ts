@@ -1,4 +1,5 @@
 'use server';
+import { splitReferences } from '@/lib/content-ideas';
 import { currentActor } from '@/lib/current-actor';
 import * as ops from '@/services/operations';
 import {
@@ -44,6 +45,7 @@ export async function submitOperation(
           channel: str('channel'),
           format: str('format'),
           body: str('body'),
+          referenceLinks: splitReferences(str('referenceLinks')),
           scheduledAt: str('scheduledAt'),
         });
         break;
@@ -54,6 +56,7 @@ export async function submitOperation(
           channel: str('channel'),
           format: str('format'),
           body: str('body'),
+          referenceLinks: splitReferences(str('referenceLinks')),
           scheduledAt: str('scheduledAt'),
         });
         break;

@@ -283,6 +283,8 @@ enum ContentStatus {
  PUBLISHED
 }
 model ContentItem {
+ referenceLinks String[] @default([])
+ importKey String?
  id String @id @default(cuid())
  organizationId String
  brandId String
@@ -298,5 +300,6 @@ model ContentItem {
  updatedAt DateTime @updatedAt
  brand Brand @relation(fields:[organizationId,brandId], references:[organizationId,id], onDelete:Restrict)
  @@index([organizationId,scheduledAt])
+ @@unique([organizationId,brandId,importKey])
  @@index([organizationId,brandId,status])
 }

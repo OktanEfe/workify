@@ -1,4 +1,12 @@
 import Link from 'next/link';
+import { ContentImport } from '@/components/content-import';
+import { WebExamples } from '@/components/web-examples';
+import {
+  productionIdeas,
+  relatedExamples,
+  keywords,
+} from '@/lib/content-ideas';
+import { suggestedSearch } from '@/services/content-inspiration';
 import { currentActor } from '@/lib/current-actor';
 import { db } from '@/lib/db';
 import { brandScope } from '@/services/context';
@@ -8,7 +16,12 @@ import { displayDate, localStamp } from '@/lib/dates';
 export default async function Content({
   searchParams,
 }: {
-  searchParams: Promise<{ brand?: string; status?: string; q?: string }>;
+  searchParams: Promise<{
+    brand?: string;
+    status?: string;
+    q?: string;
+    idea?: string;
+  }>;
 }) {
   const actor = await currentActor();
   const raw = await searchParams;
@@ -26,18 +39,49 @@ export default async function Content({
       orderBy: { name: 'asc' },
     }),
   ]);
+  const selected = items.find((item) => item.id === raw.idea) ?? items[0];
+  const related = selected ? relatedExamples(selected, items) : [];
+  const studioHref = (id: string) =>
+    '/workspace/content?' +
+    new URLSearchParams({ ...raw, idea: id }) +
+    '#inspiration';
   return (
     <>
       <div className="page-heading">
         <div>
           <span className="eyebrow">PLANLA · ONAYLA · TAKİP ET</span>
-          <h1>İçerik takibi</h1>
-          <p>Marka, kanal, yayın tarihi ve onay durumunu tek yerde izleyin.</p>
+          <h1>İçerik stüdyosu</h1>
+          <p>
+            Fikirleri toplayın, örneklerle zenginleştirin ve üretime hazır hale
+            getirin.
+          </p>
         </div>
-        <Link className="button-link" href="/workspace/calendar">
-          Takvimde gör ↗
+        <Link className="button-link" href={selected ? '#inspiration' : '#new'}>
+          Örnekleri keşfet ↗
         </Link>
       </div>
+      <div className="content-studio-intro">
+        <div>
+          <span>01</span>
+          <strong>Fikir havuzu</strong>
+          <p>Excel tablonuzu aktarın veya yeni fikir ekleyin.</p>
+        </div>
+        <div>
+          <span>02</span>
+          <strong>Örnek arşivi</strong>
+          <p>İlham veren linkleri ve neyi beğendiğinizi kaydedin.</p>
+        </div>
+        <div>
+          <span>03</span>
+          <strong>Bunlara da bak!</strong>
+          <p>İlişkili örnekleri keşfedin, üretim akışını netleştirin.</p>
+        </div>
+      </div>
+      {actor.role === 'ADMIN' && (
+        <ContentImport
+          brands={brands.map((b) => ({ id: b.id, name: b.name }))}
+        />
+      )}
       {actor.role === 'ADMIN' && (
         <section className="panel" id="new">
           <h2>＋ İçerik planla</h2>
@@ -84,6 +128,18 @@ export default async function Content({
                 <label>
                   Planlanan yayın (İstanbul saati)
                   <input name="scheduledAt" type="datetime-local" />
+                </label>
+                <label className="span-2">
+                  Örnek içerik bağlantıları
+                  <textarea
+                    name="referenceLinks"
+                    maxLength={20000}
+                    placeholder="Her satıra bir HTTPS bağlantısı. Instagram, TikTok, YouTube veya başka bir örnek."
+                  />
+                  <small>
+                    En fazla 10 bağlantı. Üretim notunda örnekte neyi
+                    beğendiğinizi anlatın.
+                  </small>
                 </label>
                 <label className="span-2">
                   Metin / üretim notu
@@ -211,6 +267,15 @@ export default async function Content({
                     />
                   </label>
                   <label>
+                    Örnek içerik bağlantıları
+                    <textarea
+                      name="referenceLinks"
+                      maxLength={20000}
+                      defaultValue={item.referenceLinks.join('\n')}
+                    />
+                    <small>Her satıra bir HTTPS bağlantısı; en fazla 10.</small>
+                  </label>
+                  <label>
                     Metin / üretim notu
                     <textarea
                       name="body"
@@ -224,6 +289,24 @@ export default async function Content({
             <p className="content-copy">
               {item.body || 'Üretim notu eklenmedi.'}
             </p>
+            {item.referenceLinks.length > 0 && (
+              <div className="content-references">
+                <strong>İlham bağlantıları</strong>
+                {item.referenceLinks.map((url, i) => (
+                  <a
+                    key={url + i}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {i + 1}. {new URL(url).hostname} ↗
+                  </a>
+                ))}
+              </div>
+            )}
+            <Link className="inspiration-jump" href={studioHref(item.id)}>
+              Bu fikir için örneklere bak ↗
+            </Link>
             {actor.role === 'ADMIN' && (
               <ActionForm operation="content-status" label="Durumu kaydet">
                 <input type="hidden" name="id" value={item.id} />
@@ -243,6 +326,103 @@ export default async function Content({
           </section>
         ))}
       </div>
+      {selected && (
+        <section className="panel inspiration-studio" id="inspiration">
+          <div className="panel-heading">
+            <div>
+              <span className="eyebrow">İLHAMDAN ÜRETİME</span>
+              <h2>Bunlara da bak!</h2>
+              <p>Konu, kanal ve format üzerinden örnekleri eşleştirin.</p>
+            </div>
+          </div>
+          <form className="filters">
+            <input type="hidden" name="brand" value={raw.brand ?? ''} />
+            <label>
+              Hangi fikri geliştirelim?
+              <select key={selected.id} name="idea" defaultValue={selected.id}>
+                {items.map((item) => (
+                  <option value={item.id} key={item.id}>
+                    {item.brand.name} · {item.title}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button>Fikri incele</button>
+          </form>
+          <div className="inspiration-focus">
+            <span className="status-badge">
+              {selected.channel} · {selected.format}
+            </span>
+            <h3>{selected.title}</h3>
+            <p>
+              {selected.body ||
+                'Daha ilgili öneriler için içeriğe hedef kitle, konu ve örnekte beğendiğiniz ayrıntıları ekleyin.'}
+            </p>
+            <div className="keyword-chips">
+              {keywords(selected.title + ' ' + selected.body)
+                .slice(0, 8)
+                .map((word) => (
+                  <span key={word}>{word}</span>
+                ))}
+            </div>
+          </div>
+          <h3>Markanın arşivinden ilgili örnekler</h3>
+          {related.length ? (
+            <div className="example-grid">
+              {related.map((item) => (
+                <article className="example-card" key={item.id}>
+                  <span className="eyebrow">KENDİ ARŞİVİNİZDEN</span>
+                  <h4>{item.title}</h4>
+                  <p>{item.reason}</p>
+                  {item.referenceLinks
+                    .filter((url) => !selected.referenceLinks.includes(url))
+                    .slice(0, 3)
+                    .map((url) => (
+                      <a
+                        key={url}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {new URL(url).hostname} ↗
+                      </a>
+                    ))}
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="help">
+              Bu marka için henüz ilişkili bir örnek yok. İçeriklere açıklama ve
+              örnek linkleri ekledikçe bu alan gelişir.
+            </p>
+          )}
+          <h3>Bu fikri nasıl içeriğe dönüştürebiliriz?</h3>
+          <p className="help">
+            Aşağıdaki üretim taslakları, girdiğiniz konu ve formata göre
+            kurallarla hazırlanır; video izlenerek üretilmiş analiz değildir.
+          </p>
+          <div className="production-grid">
+            {productionIdeas(selected).map((idea) => (
+              <article className="production-card" key={idea.title}>
+                <h4>{idea.title}</h4>
+                <strong>İlk sahne</strong>
+                <p>{idea.hook}</p>
+                <strong>Akış</strong>
+                <p>{idea.flow}</p>
+                <strong>Kapanış</strong>
+                <p>{idea.cta}</p>
+              </article>
+            ))}
+          </div>
+          <WebExamples
+            key={selected.id}
+            id={selected.id}
+            initialQuery={suggestedSearch(selected)}
+            configured={!!process.env.TAVILY_API_KEY}
+            referenceCount={selected.referenceLinks.length}
+          />
+        </section>
+      )}
       {!items.length && (
         <section className="panel empty-state">
           <h2>İçerik listeniz boş</h2>
