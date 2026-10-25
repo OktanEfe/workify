@@ -1,3 +1,10 @@
+import {
+  brandPublications,
+  brandCreativeBrief,
+  saveBrandIdentity,
+} from '../../src/services/brand-planning';
+import { taskCalendar } from '../../src/services/task-calendar';
+import { calendarMonth } from '../../src/lib/calendar';
 import { formOptions } from '../../src/services/queries';
 import { rescheduleTask, moveTaskDate } from '../../src/services/scheduling';
 import { verify, hash } from 'argon2';
@@ -311,12 +318,12 @@ suite('PostgreSQL: kurum, görev, özel alan ve audit', () => {
     await expect(
       importContentIdeas(outsider, { brandId, rows: [row] }),
     ).rejects.toThrow();
-    await expect(
-      importContentIdeas(employee, { brandId, rows: [row] }),
-    ).rejects.toThrow();
+    expect(
+      await importContentIdeas(employee, { brandId, rows: [row] }),
+    ).toEqual({ inserted: 0, skipped: 1 });
     await expect(
       importContentIdeas(
-        { ...employee, role: 'ADMIN' },
+        { ...unauthorized, role: 'ADMIN' },
         { brandId, rows: [row] },
       ),
     ).rejects.toThrow();
@@ -413,30 +420,28 @@ suite('PostgreSQL: kurum, görev, özel alan ve audit', () => {
     });
     const previous = process.env.TAVILY_API_KEY;
     process.env.TAVILY_API_KEY = 'test-only-key';
-    const mocked = vi
-      .spyOn(globalThis, 'fetch')
-      .mockImplementation(
-        async (input) =>
-          new Response(
-            JSON.stringify(
-              String(input).endsWith('/extract')
-                ? {
-                    results: [
-                      { url, raw_content: 'Espresso çekirdek öğütme ipuçları' },
-                    ],
-                  }
-                : {
-                    results: [
-                      {
-                        title: 'Demleme',
-                        url: 'https://example.com/new',
-                        content: 'Yeni örnek',
-                      },
-                    ],
-                  },
-            ),
+    const mocked = vi.spyOn(globalThis, 'fetch').mockImplementation(
+      async (input) =>
+        new Response(
+          JSON.stringify(
+            String(input).endsWith('/extract')
+              ? {
+                  results: [
+                    { url, raw_content: 'Espresso çekirdek öğütme ipuçları' },
+                  ],
+                }
+              : {
+                  results: [
+                    {
+                      title: 'Demleme',
+                      url: 'https://example.com/new',
+                      content: 'Yeni örnek',
+                    },
+                  ],
+                },
           ),
-      );
+        ),
+    );
     try {
       const result = await searchWebExamples(
         actor,
@@ -463,6 +468,242 @@ suite('PostgreSQL: kurum, görev, özel alan ve audit', () => {
         },
       });
     }
+  });
+  it('çalışan kendi markasına içerik ve Excel fikri ekler; başka marka, iptal ve pasif üyelik engellenir', async () => {
+    const brandId = await assignedBrand();
+    const input = {
+      title: 'Çalışanın paylaşımı',
+      brandId,
+      channel: 'Instagram',
+      format: 'Reels',
+      scheduledAt: '2026-10-26T14:00',
+      referenceLinks: ['https://example.com/idea'],
+    };
+    const id = await createContent(employee, input);
+    expect(
+      await db.contentItem.findUniqueOrThrow({ where: { id } }),
+    ).toMatchObject({
+      organizationId: employee.organizationId,
+      status: 'DRAFT',
+    });
+    expect(
+      await importContentIdeas(employee, {
+        brandId,
+        rows: [
+          {
+            title: 'Excel çalışan fikri',
+            body: 'Örnek',
+            channel: 'YouTube',
+            format: 'Video',
+            referenceLinks: [],
+          },
+        ],
+      }),
+    ).toEqual({ inserted: 1, skipped: 0 });
+    await expect(createContent(unauthorized, input)).rejects.toThrow();
+    await expect(
+      createContent({ ...unauthorized, role: 'ADMIN' }, input),
+    ).rejects.toThrow();
+    await expect(createContent(outsider, input)).rejects.toThrow();
+    await expect(
+      changeContentStatus(employee, id, 0, 'APPROVED'),
+    ).rejects.toThrow();
+    await setBrandMember(admin, brandId, employee.membershipId, false);
+    await expect(createContent(employee, input)).rejects.toThrow();
+    const inactive = await member(admin.organizationId, 'EMPLOYEE');
+    await setBrandMember(admin, brandId, inactive.membershipId, true);
+    await db.membership.update({
+      where: { id: inactive.membershipId },
+      data: { active: false },
+    });
+    await expect(createContent(inactive, input)).rejects.toThrow();
+    await expect(
+      importContentIdeas(inactive, {
+        brandId,
+        rows: [{ title: 'Yasak', channel: 'Instagram', format: 'Reels' }],
+      }),
+    ).rejects.toThrow();
+  });
+  it('marka paylaşım takvimi ay, kanal ve kurum/marka erişimi ile sınırlıdır', async () => {
+    const brandId = await assignedBrand();
+    const month = calendarMonth('2026-10');
+    const input = {
+      title: 'Ekim paylaşımı',
+      brandId,
+      channel: 'Instagram',
+      format: 'Reels',
+      scheduledAt: '2026-10-26T14:00',
+    };
+    const id = await createContent(employee, input);
+    await createContent(admin, {
+      ...input,
+      title: 'Kasım',
+      scheduledAt: '2026-11-01T00:00',
+    });
+    await createContent(admin, {
+      ...input,
+      title: 'Tarihsiz',
+      scheduledAt: '',
+    });
+    const data = await brandPublications(employee, month.start, month.end, {
+      brand: brandId,
+      channel: 'Instagram',
+    });
+    expect(data.items.map((i) => i.id)).toEqual([id]);
+    expect(data.unscheduledCount).toBe(1);
+    expect(
+      (
+        await brandPublications(employee, month.start, month.end, {
+          brand: brandId,
+          channel: 'YouTube',
+        })
+      ).items,
+    ).toHaveLength(0);
+    for (const actor of [
+      outsider,
+      unauthorized,
+      { ...unauthorized, role: 'ADMIN' as const },
+    ])
+      expect(
+        (
+          await brandPublications(actor, month.start, month.end, {
+            brand: brandId,
+          })
+        ).items,
+      ).toHaveLength(0);
+    await setBrandMember(admin, brandId, employee.membershipId, false);
+    expect(
+      (
+        await brandPublications(employee, month.start, month.end, {
+          brand: brandId,
+        })
+      ).items,
+    ).toHaveLength(0);
+    await db.brand.update({ where: { id: brandId }, data: { archived: true } });
+    expect(
+      (
+        await brandPublications(admin, month.start, month.end, {
+          brand: brandId,
+        })
+      ).items,
+    ).toHaveLength(0);
+  });
+  it('marka kimliği ekipçe güncellenir; başka kurum, atanmayan çalışan, sürüm ve alan taşması reddedilir', async () => {
+    const brandId = await assignedBrand();
+    const initial = await brandCreativeBrief(employee, brandId);
+    await saveBrandIdentity(employee, brandId, initial.version, {
+      brandIdentity: 'Sıcak ve samimi',
+      targetAudience: 'Kahve severler',
+      palette: '#1A2B4C #FFFFFF',
+      visualDirection: 'Doğal ışık',
+      designPlan: '3 gönderi, 1 Reels',
+      assetLinks: ['https://example.com/brand-guide'],
+    });
+    const saved = await brandCreativeBrief(admin, brandId);
+    expect(saved).toMatchObject({
+      brandIdentity: 'Sıcak ve samimi',
+      designPlan: '3 gönderi, 1 Reels',
+      version: initial.version + 1,
+    });
+    await expect(
+      saveBrandIdentity(employee, brandId, initial.version, {
+        designPlan: 'Eski sürüm',
+      }),
+    ).rejects.toThrow('Marka değişti');
+    for (const actor of [
+      outsider,
+      unauthorized,
+      { ...unauthorized, role: 'ADMIN' as const },
+    ]) {
+      await expect(brandCreativeBrief(actor, brandId)).rejects.toThrow();
+      await expect(
+        saveBrandIdentity(actor, brandId, saved.version, {
+          designPlan: 'Yetkisiz',
+        }),
+      ).rejects.toThrow();
+    }
+    await expect(
+      saveBrandIdentity(employee, brandId, saved.version, {
+        name: 'Marka ismini değiştir',
+      }),
+    ).rejects.toThrow();
+    await setBrandMember(admin, brandId, employee.membershipId, false);
+    await expect(
+      saveBrandIdentity(employee, brandId, saved.version, {
+        designPlan: 'İptal sonrası',
+      }),
+    ).rejects.toThrow();
+    expect((await brandCreativeBrief(admin, brandId)).designPlan).toBe(
+      '3 gönderi, 1 Reels',
+    );
+  });
+  it('ortak görev takvimi yalnız kurum içi özet paylaşır; kişisel görünüm ve düzenleme yetkisi korunur', async () => {
+    const brandId = await assignedBrand();
+    const month = calendarMonth('2026-10');
+    const id = await createTask(admin, {
+      title: 'Ekipte görünür',
+      description: 'Özel görev ayrıntısı',
+      brandId,
+      priority: 'MEDIUM',
+      startAt: '2026-10-26T09:00',
+      dueAt: '2026-10-28T18:00',
+      assignees: [employee.membershipId],
+    });
+    const team = await taskCalendar(unauthorized, month.start, month.end, {
+      brand: brandId,
+    });
+    expect(team.map((t) => t.id)).toEqual([id]);
+    expect(team[0].canEdit).toBe(false);
+    expect(team[0]).not.toHaveProperty('description');
+    expect(team[0]).not.toHaveProperty('assignments');
+    expect(team[0]).not.toHaveProperty('organizationId');
+    expect(
+      (
+        await taskCalendar(
+          { ...unauthorized, role: 'ADMIN' },
+          month.start,
+          month.end,
+          { brand: brandId },
+        )
+      )[0].canEdit,
+    ).toBe(false);
+    expect(
+      await taskCalendar(unauthorized, month.start, month.end, {
+        brand: brandId,
+        mine: true,
+      }),
+    ).toHaveLength(0);
+    expect(
+      (
+        await taskCalendar(employee, month.start, month.end, {
+          brand: brandId,
+          mine: true,
+        })
+      )[0].canEdit,
+    ).toBe(true);
+    expect(
+      await taskCalendar(outsider, month.start, month.end, { brand: brandId }),
+    ).toHaveLength(0);
+    await expect(
+      updateTaskStatus(unauthorized, {
+        id,
+        version: 0,
+        status: 'COMPLETED',
+        position: 1024,
+      }),
+    ).rejects.toThrow();
+    await setBrandMember(admin, brandId, employee.membershipId, false);
+    expect(
+      await taskCalendar(employee, month.start, month.end, {
+        brand: brandId,
+        mine: true,
+      }),
+    ).toHaveLength(0);
+    expect(
+      (
+        await taskCalendar(employee, month.start, month.end, { brand: brandId })
+      )[0].canEdit,
+    ).toBe(false);
   });
   it('çalışan marka oluşturamaz; sahte ADMIN bilgisi güvenilir sayılmaz', async () => {
     await expect(

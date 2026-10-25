@@ -53,6 +53,14 @@ export default async function Brands({
           </Link>
         </div>
       )}
+      <div className="studio-shortcuts">
+        <Link href="/workspace/brand-calendar">
+          ◷ Markaların paylaşım takvimi
+        </Link>
+        <span>
+          Marka kartından kimlik, tasarım notları ve içeriklere ulaşabilirsiniz.
+        </span>
+      </div>
       <div className="brand-grid">
         {brands.map((brand) => (
           <Link

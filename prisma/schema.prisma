@@ -120,6 +120,14 @@ model Membership {
  @@index([userId,active])
 }
 model Brand {
+ brandIdentity String @default("")
+ targetAudience String @default("")
+ toneOfVoice String @default("")
+ visualDirection String @default("")
+ designPlan String @default("")
+ palette String @default("")
+ typography String @default("")
+ assetLinks String[] @default([])
  id String @id @default(cuid())
  organizationId String
  name String

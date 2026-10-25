@@ -22,51 +22,47 @@ export async function importContentIdeas(actor: Actor, input: unknown) {
   const data = importInput.parse(input);
   if (JSON.stringify(data).length > 450000)
     throw Error('Aktarım çok büyük. Daha küçük bir tablo seçin.');
-  return withActor(
-    actor,
-    async (tx, fresh, name) => {
-      const brand = await tx.brand.findFirst({
-        where: {
-          id: data.brandId,
-          organizationId: fresh.organizationId,
-          archived: false,
-        },
-      });
-      if (!brand) throw new AccessDenied();
-      const rows = data.rows.map((row) => ({
-        ...row,
-        organizationId: fresh.organizationId,
-        brandId: brand.id,
-        importKey: createHash('sha256')
-          .update(
-            JSON.stringify([
-              row.title,
-              row.body,
-              row.channel,
-              row.format,
-              [...new Set(row.referenceLinks)].sort(),
-            ]),
-          )
-          .digest('hex'),
-      }));
-      const result = await tx.contentItem.createMany({
-        data: rows,
-        skipDuplicates: true,
-      });
-      await audit(tx, fresh, name, {
-        action: 'IMPORT',
-        entity: 'ContentItem',
-        entityId: brand.id,
-        brandId: brand.id,
-        summary: `Excel'den ${result.count} içerik fikri eklendi.`,
-      });
-      return {
-        inserted: result.count,
-        skipped: data.rows.length - result.count,
-      };
-    },
-    true,
-  );
+  return withActor(actor, async (tx, fresh, name) => {
+    const brand = await tx.brand.findFirst({
+      where: {
+        ...brandScope(fresh),
+        id: data.brandId,
+        archived: false,
+      },
+    });
+    if (!brand) throw new AccessDenied();
+    const rows = data.rows.map((row) => ({
+      ...row,
+      organizationId: fresh.organizationId,
+      brandId: brand.id,
+      importKey: createHash('sha256')
+        .update(
+          JSON.stringify([
+            row.title,
+            row.body,
+            row.channel,
+            row.format,
+            [...new Set(row.referenceLinks)].sort(),
+          ]),
+        )
+        .digest('hex'),
+    }));
+    const result = await tx.contentItem.createMany({
+      data: rows,
+      skipDuplicates: true,
+    });
+    await audit(tx, fresh, name, {
+      action: 'IMPORT',
+      entity: 'ContentItem',
+      entityId: brand.id,
+      brandId: brand.id,
+      summary: `Excel'den ${result.count} içerik fikri eklendi.`,
+    });
+    return {
+      inserted: result.count,
+      skipped: data.rows.length - result.count,
+    };
+  });
 }
 export async function inspirationSource(actor: Actor, id: string) {
   const item = await db.contentItem.findFirst({

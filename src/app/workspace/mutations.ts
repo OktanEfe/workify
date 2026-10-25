@@ -1,5 +1,6 @@
 'use server';
 import { splitReferences } from '@/lib/content-ideas';
+import { saveBrandIdentity } from '@/services/brand-planning';
 import { currentActor } from '@/lib/current-actor';
 import * as ops from '@/services/operations';
 import {
@@ -67,6 +68,18 @@ export async function submitOperation(
           Number(str('version')),
           str('status'),
         );
+        break;
+      case 'brand-identity':
+        await saveBrandIdentity(actor, str('id'), Number(str('version')), {
+          brandIdentity: str('brandIdentity'),
+          targetAudience: str('targetAudience'),
+          toneOfVoice: str('toneOfVoice'),
+          visualDirection: str('visualDirection'),
+          designPlan: str('designPlan'),
+          palette: str('palette'),
+          typography: str('typography'),
+          assetLinks: splitReferences(str('assetLinks')),
+        });
         break;
       case 'brand-save': {
         const id = await ops.saveBrand(

@@ -20,17 +20,26 @@ export function MonthNavigation({
   previous,
   next,
   brand,
+  basePath = '/workspace/calendar',
+  filters = {},
 }: {
   month: string;
   previous: string;
   next: string;
   brand?: string;
+  basePath?: string;
+  filters?: Record<string, string>;
 }) {
   const router = useRouter();
   const [year, current] = month.split('-');
   const href = (value: string) =>
-    '/workspace/calendar?' +
-    new URLSearchParams({ month: value, ...(brand ? { brand } : {}) });
+    basePath +
+    '?' +
+    new URLSearchParams({
+      ...filters,
+      month: value,
+      ...(brand ? { brand } : {}),
+    });
   return (
     <div className="month-navigation">
       <Link href={href(previous)} aria-label="Önceki ay">
@@ -69,7 +78,14 @@ export function MonthNavigation({
       <Link href={href(next)} aria-label="Sonraki ay">
         Sonraki ay →
       </Link>
-      <Link href="/workspace/calendar" className="subtle-button">
+      <Link
+        href={
+          basePath +
+          '?' +
+          new URLSearchParams({ ...filters, ...(brand ? { brand } : {}) })
+        }
+        className="subtle-button"
+      >
         Bugüne dön
       </Link>
     </div>

@@ -50,6 +50,15 @@ export default async function BrandDetail({
       </div>
       <div className="section-tabs">
         <a href="#overview">Genel bakış</a>
+        <Link href={'/workspace/brand-calendar?brand=' + id}>
+          Paylaşım takvimi
+        </Link>
+        {!brand.archived && (
+          <Link href={'/workspace/brands/' + id + '/studio'}>
+            Marka kimliği & tasarım
+          </Link>
+        )}
+        <Link href={'/workspace/content?brand=' + id}>İçerikler</Link>
         <a href="#tasks">Görevler</a>
         <a href="#projects">Projeler</a>
         <a href="#team">Ekip</a>

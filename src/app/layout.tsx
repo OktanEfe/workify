@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import './workspace-refresh.css';
+import './planning.css';
 export const metadata: Metadata = {
   title: 'Avrasia · Ajans çalışma alanı',
   description: 'Avrasia Creative ekip çalışma alanı',

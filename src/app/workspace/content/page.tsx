@@ -12,7 +12,7 @@ import { db } from '@/lib/db';
 import { brandScope } from '@/services/context';
 import { listContent, contentStatuses } from '@/services/content';
 import { ActionForm } from '@/components/action-form';
-import { displayDate, localStamp } from '@/lib/dates';
+import { displayDate, localStamp, startFromCalendar } from '@/lib/dates';
 export default async function Content({
   searchParams,
 }: {
@@ -21,6 +21,10 @@ export default async function Content({
     status?: string;
     q?: string;
     idea?: string;
+    item?: string;
+    start?: string;
+    new?: string;
+    channel?: string;
   }>;
 }) {
   const actor = await currentActor();
@@ -60,6 +64,19 @@ export default async function Content({
           Örnekleri keşfet ↗
         </Link>
       </div>
+      <div className="studio-shortcuts">
+        <Link
+          href={
+            '/workspace/brand-calendar' +
+            (raw.brand ? '?brand=' + encodeURIComponent(raw.brand) : '')
+          }
+        >
+          ◷ Marka paylaşım takvimi
+        </Link>
+        <span>
+          Eklenen içerikler taslak olarak kaydedilir; yayın onayı yöneticidedir.
+        </span>
+      </div>
       <div className="content-studio-intro">
         <div>
           <span>01</span>
@@ -77,84 +94,116 @@ export default async function Content({
           <p>İlişkili örnekleri keşfedin, üretim akışını netleştirin.</p>
         </div>
       </div>
-      {actor.role === 'ADMIN' && (
-        <ContentImport
-          brands={brands.map((b) => ({ id: b.id, name: b.name }))}
-        />
-      )}
-      {actor.role === 'ADMIN' && (
-        <section className="panel" id="new">
-          <h2>＋ İçerik planla</h2>
-          {brands.length ? (
-            <ActionForm operation="content-create" label="İçeriği ekle" reset>
-              <div className="form-grid">
-                <label>
-                  İçerik başlığı
-                  <input name="title" required maxLength={200} />
-                </label>
-                <label>
-                  Marka
-                  <select name="brandId" required>
-                    {brands.map((b) => (
-                      <option value={b.id} key={b.id}>
-                        {b.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  Kanal
-                  <select name="channel">
-                    {[
+      <ContentImport
+        key={raw.brand ?? 'all'}
+        initialBrandId={raw.brand}
+        brands={brands.map((b) => ({ id: b.id, name: b.name }))}
+      />
+      <section className="panel" id="new">
+        <h2>＋ İçerik planla</h2>
+        {brands.length ? (
+          <ActionForm
+            key={(raw.brand ?? '') + (raw.start ?? '') + (raw.channel ?? '')}
+            operation="content-create"
+            label="İçeriği ekle"
+            reset
+          >
+            <div className="form-grid">
+              <label>
+                İçerik başlığı
+                <input name="title" required maxLength={200} />
+              </label>
+              <label>
+                Marka
+                <select
+                  name="brandId"
+                  required
+                  defaultValue={
+                    brands.some((b) => b.id === raw.brand)
+                      ? raw.brand
+                      : undefined
+                  }
+                >
+                  {brands.map((b) => (
+                    <option value={b.id} key={b.id}>
+                      {b.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Kanal
+                <select
+                  name="channel"
+                  defaultValue={
+                    [
                       'Instagram',
                       'TikTok',
                       'LinkedIn',
                       'YouTube',
                       'Facebook',
                       'Web',
-                    ].map((v) => (
-                      <option key={v}>{v}</option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  Format
-                  <select name="format">
-                    {['Gönderi', 'Reels', 'Story', 'Video', 'Yazı'].map((v) => (
-                      <option key={v}>{v}</option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  Planlanan yayın (İstanbul saati)
-                  <input name="scheduledAt" type="datetime-local" />
-                </label>
-                <label className="span-2">
-                  Örnek içerik bağlantıları
-                  <textarea
-                    name="referenceLinks"
-                    maxLength={20000}
-                    placeholder="Her satıra bir HTTPS bağlantısı. Instagram, TikTok, YouTube veya başka bir örnek."
-                  />
-                  <small>
-                    En fazla 10 bağlantı. Üretim notunda örnekte neyi
-                    beğendiğinizi anlatın.
-                  </small>
-                </label>
-                <label className="span-2">
-                  Metin / üretim notu
-                  <textarea name="body" maxLength={10000} />
-                </label>
-              </div>
-            </ActionForm>
-          ) : (
-            <p>
-              İçerik planlamak için{' '}
-              <Link href="/workspace/brands/new">önce bir marka ekleyin →</Link>
-            </p>
-          )}
-        </section>
-      )}
+                    ].includes(raw.channel ?? '')
+                      ? raw.channel
+                      : 'Instagram'
+                  }
+                >
+                  {[
+                    'Instagram',
+                    'TikTok',
+                    'LinkedIn',
+                    'YouTube',
+                    'Facebook',
+                    'Web',
+                  ].map((v) => (
+                    <option key={v}>{v}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Format
+                <select name="format">
+                  {['Gönderi', 'Reels', 'Story', 'Video', 'Yazı'].map((v) => (
+                    <option key={v}>{v}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Planlanan yayın (İstanbul saati)
+                <input
+                  name="scheduledAt"
+                  type="datetime-local"
+                  defaultValue={startFromCalendar(raw.start)}
+                />
+              </label>
+              <label className="span-2">
+                Örnek içerik bağlantıları
+                <textarea
+                  name="referenceLinks"
+                  maxLength={20000}
+                  placeholder="Her satıra bir HTTPS bağlantısı. Instagram, TikTok, YouTube veya başka bir örnek."
+                />
+                <small>
+                  En fazla 10 bağlantı. Üretim notunda örnekte neyi
+                  beğendiğinizi anlatın.
+                </small>
+              </label>
+              <label className="span-2">
+                Metin / üretim notu
+                <textarea name="body" maxLength={10000} />
+              </label>
+            </div>
+          </ActionForm>
+        ) : (
+          <p>
+            {actor.role === 'ADMIN' ? (
+              <Link href="/workspace/brands/new">Önce bir marka ekleyin →</Link>
+            ) : (
+              'İçerik eklemek için yöneticiniz sizi bir markaya atamalı.'
+            )}
+          </p>
+        )}
+      </section>
       <section className="panel">
         <form className="filters">
           <input
@@ -192,7 +241,11 @@ export default async function Content({
       </section>
       <div className="content-grid">
         {items.map((item) => (
-          <section className="panel content-card" key={item.id}>
+          <section
+            className="panel content-card"
+            key={item.id}
+            id={'content-' + item.id}
+          >
             <div className="content-meta">
               <span>{item.brand.name}</span>
               <span className="status-badge">
@@ -429,7 +482,7 @@ export default async function Content({
           <p>
             {actor.role === 'ADMIN'
               ? 'İlk içeriği yukarıdaki formdan ekleyin veya filtreleri değiştirin.'
-              : 'Size atanan markaların içerikleri burada görünecek.'}
+              : 'Yetkili olduğunuz markaya yukarıdaki formdan içerik ekleyebilirsiniz.'}
           </p>
         </section>
       )}

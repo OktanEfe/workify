@@ -15,7 +15,8 @@ const groups = [
     items: [
       ['/workspace/tasks', 'İş panosu', '▦'],
       ['/workspace/projects', 'Projeler', '▱'],
-      ['/workspace/calendar', 'Takvimim', '▦'],
+      ['/workspace/calendar', 'Görev takvimi', '▦'],
+      ['/workspace/brand-calendar', 'Paylaşım takvimi', '◷'],
       ['/workspace/content', 'İçerik stüdyosu', '▤'],
       ['/workspace/brands', 'Markalar', '◎'],
     ],

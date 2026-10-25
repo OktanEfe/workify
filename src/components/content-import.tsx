@@ -8,12 +8,18 @@ import {
 } from '@/lib/content-ideas';
 import { importIdeas } from '@/app/workspace/content/actions';
 export function ContentImport({
+  initialBrandId,
   brands,
 }: {
   brands: { id: string; name: string }[];
+  initialBrandId?: string;
 }) {
   const [rows, setRows] = useState<ImportedIdea[]>([]),
-    [brand, setBrand] = useState(brands[0]?.id ?? ''),
+    [brand, setBrand] = useState(
+      brands.some((b) => b.id === initialBrandId)
+        ? initialBrandId!
+        : (brands[0]?.id ?? ''),
+    ),
     [message, setMessage] = useState(''),
     [busy, setBusy] = useState(false),
     [filename, setFilename] = useState('');

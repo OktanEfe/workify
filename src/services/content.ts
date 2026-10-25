@@ -31,31 +31,27 @@ export const contentInput = z.object({
 export async function createContent(actor: Actor, input: unknown) {
   const data = contentInput.parse(input);
   const scheduledAt = parseLocal(data.scheduledAt);
-  return withActor(
-    actor,
-    async (tx, fresh, name) => {
-      const brand = await tx.brand.findFirst({
-        where: {
-          id: data.brandId,
-          organizationId: fresh.organizationId,
-          archived: false,
-        },
-      });
-      if (!brand) throw new AccessDenied();
-      const item = await tx.contentItem.create({
-        data: { ...data, scheduledAt, organizationId: fresh.organizationId },
-      });
-      await audit(tx, fresh, name, {
-        action: 'CREATE',
-        entity: 'ContentItem',
-        entityId: item.id,
-        brandId: item.brandId,
-        summary: `${item.title} içerik planına eklendi.`,
-      });
-      return item.id;
-    },
-    true,
-  );
+  return withActor(actor, async (tx, fresh, name) => {
+    const brand = await tx.brand.findFirst({
+      where: {
+        ...brandScope(fresh),
+        id: data.brandId,
+        archived: false,
+      },
+    });
+    if (!brand) throw new AccessDenied();
+    const item = await tx.contentItem.create({
+      data: { ...data, scheduledAt, organizationId: fresh.organizationId },
+    });
+    await audit(tx, fresh, name, {
+      action: 'CREATE',
+      entity: 'ContentItem',
+      entityId: item.id,
+      brandId: item.brandId,
+      summary: `${item.title} içerik planına eklendi.`,
+    });
+    return item.id;
+  });
 }
 export async function changeContentStatus(
   actor: Actor,
@@ -121,7 +117,7 @@ export function contentScope(actor: Actor) {
 }
 export async function listContent(
   actor: Actor,
-  filters: { brand?: string; status?: string; q?: string } = {},
+  filters: { brand?: string; status?: string; q?: string; item?: string } = {},
 ) {
   const status = z
     .enum([
@@ -137,6 +133,7 @@ export async function listContent(
   return db.contentItem.findMany({
     where: {
       ...contentScope(actor),
+      ...(filters.item ? { id: filters.item } : {}),
       ...(filters.brand ? { brandId: filters.brand } : {}),
       ...(status ? { status } : {}),
       ...(filters.q

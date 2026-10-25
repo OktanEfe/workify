@@ -24,11 +24,13 @@ export function CalendarBoard({
   events,
   today,
   brand,
+  canCreate = true,
 }: {
   cells: (string | null)[];
   events: CalendarEvent[];
   today: string;
   brand?: string;
+  canCreate?: boolean;
 }) {
   const [pending, startTransition] = useTransition();
   const [drag, setDrag] = useState<string | null>(null);
@@ -86,10 +88,11 @@ export function CalendarBoard({
   return (
     <>
       <p className="calendar-instructions">
-        Görevin tutamacını bir güne sürükleyin.{' '}
+        Tutamacı olan görevleri bir güne sürükleyin.{' '}
         <strong>Başlangıç taşınırsa teslim de aynı süre kadar kayar.</strong>{' '}
         Teslim kartı yalnız teslim gününü değiştirir. Telefon ve klavye için
-        görev ayrıntısındaki tarih formunu kullanabilirsiniz.
+        görev ayrıntısındaki tarih formunu kullanabilirsiniz. Ekipteki diğer
+        işleri görüntülemek düzenleme yetkisi vermez.
       </p>
       <div className="calendar-legend">
         <span className="legend-dot manager">Yönetici görevi</span>
@@ -154,13 +157,15 @@ export function CalendarBoard({
                         {entries.length ? `${entries.length} kayıt` : ''}
                       </small>
                     </button>
-                    <Link
-                      className="calendar-add-task"
-                      aria-label={`${day} günü için iş ekle`}
-                      href={createLink(day)}
-                    >
-                      ＋ İş
-                    </Link>
+                    {canCreate && (
+                      <Link
+                        className="calendar-add-task"
+                        aria-label={`${day} günü için iş ekle`}
+                        href={createLink(day)}
+                      >
+                        ＋ İş
+                      </Link>
+                    )}
                   </div>
                   {entries.map((event) => (
                     <article
@@ -229,9 +234,13 @@ export function CalendarBoard({
                           </span>
                         )}
                       </div>
-                      <Link href={event.href}>
+                      {event.href ? (
+                        <Link href={event.href}>
+                          <strong>{event.title}</strong>
+                        </Link>
+                      ) : (
                         <strong>{event.title}</strong>
-                      </Link>
+                      )}
                       <small>
                         {event.brand}
                         {event.employee ? ' · Çalışan ekledi' : ''}
@@ -255,32 +264,49 @@ export function CalendarBoard({
           <div>
             <h3>{selected} · Günün işleri</h3>
             <p>
-              {selectedEvents.length} kayıt. Ayrıntıya girerek tarih ve durumu
-              güncelleyebilirsiniz.
+              {selectedEvents.length} kayıt. Yetkili olduğunuz görevlerin
+              ayrıntısından tarih ve durumu güncelleyebilirsiniz.
             </p>
           </div>
-          <Link className="button-link" href={createLink(selected)}>
-            ＋ İş ekle
-          </Link>
+          {canCreate && (
+            <Link className="button-link" href={createLink(selected)}>
+              ＋ İş ekle
+            </Link>
+          )}
         </div>
         {selectedEvents.length ? (
-          selectedEvents.map((e) => (
-            <Link
-              className={`agenda-row ${e.employee ? 'employee-agenda' : ''}`}
-              key={eventKey(e)}
-              href={e.href}
-            >
-              <time>{e.time}</time>
-              <div>
-                <strong>{e.title}</strong>
-                <small>
-                  {e.label} · {e.brand}
-                  {e.assignees ? ' · ' + e.assignees : ''}
-                </small>
+          selectedEvents.map((e) => {
+            const body = (
+              <>
+                <time>{e.time}</time>
+                <div>
+                  <strong>{e.title}</strong>
+                  <small>
+                    {e.label} · {e.brand}
+                    {e.assignees ? ' · ' + e.assignees : ''}
+                  </small>
+                </div>
+                {e.href ? (
+                  <span>↗</span>
+                ) : (
+                  <span className="shared-calendar-label">Ekip görünümü</span>
+                )}
+              </>
+            );
+            return e.href ? (
+              <Link
+                className={`agenda-row ${e.employee ? 'employee-agenda' : ''}`}
+                key={eventKey(e)}
+                href={e.href}
+              >
+                {body}
+              </Link>
+            ) : (
+              <div className="agenda-row" key={eventKey(e)}>
+                {body}
               </div>
-              <span>↗</span>
-            </Link>
-          ))
+            );
+          })
         ) : (
           <p>
             Bu gün için plan yok. Takvimde başka bir gün seçebilir veya yeni iş
