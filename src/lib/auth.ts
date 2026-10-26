@@ -1,7 +1,6 @@
 import { betterAuth } from 'better-auth';
 import { APIError, createAuthMiddleware } from 'better-auth/api';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
-import { twoFactor } from 'better-auth/plugins';
 import { hash, verify, argon2id } from 'argon2';
 import { db } from './db';
 function createAuth() {
@@ -69,7 +68,6 @@ function createAuth() {
           });
       }),
     },
-    plugins: [twoFactor()],
   });
 }
 let instance: ReturnType<typeof createAuth> | undefined;

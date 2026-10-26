@@ -50,7 +50,7 @@ describe('Sunucu oturum ve üyelik denetimi', () => {
       orderBy: { id: 'asc' },
     });
   });
-  it('üretimde MFA olmayan yöneticiyi kuruluma gönderir', async () => {
+  it('üretimde yönetici için ikinci doğrulama istemez', async () => {
     vi.stubEnv('NODE_ENV', 'production');
     mocks.member.mockResolvedValue({
       id: 'm1',
@@ -59,14 +59,13 @@ describe('Sunucu oturum ve üyelik denetimi', () => {
       active: true,
     });
     mocks.user.mockResolvedValue({ twoFactorEnabled: false });
-    await expect(currentActor()).rejects.toThrow('redirect:/security');
+    expect((await currentActor()).role).toBe('ADMIN');
+    expect(mocks.user).not.toHaveBeenCalled();
   });
-  it('MFA kurulumu için oturum ve üyelik denetimini korur', async () => {
+  it('üretimde oturum ve üyelik denetimini korur', async () => {
     vi.stubEnv('NODE_ENV', 'production');
     mocks.session.mockResolvedValue(null);
-    await expect(currentActor({ allowMfaSetup: true })).rejects.toThrow(
-      'redirect:/login',
-    );
+    await expect(currentActor()).rejects.toThrow('redirect:/login');
   });
   it('MFA etkin yöneticiyi kabul eder', async () => {
     vi.stubEnv('NODE_ENV', 'production');

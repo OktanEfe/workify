@@ -83,8 +83,7 @@ export function PasswordForm() {
         />
       </label>
       <p className="security-note">
-        Değişiklikten sonra diğer cihazlardaki oturumlarınız kapatılır. İki
-        aşamalı doğrulamanız korunur.
+        Değişiklikten sonra diğer cihazlardaki oturumlarınız kapatılır.
       </p>
       {message && (
         <p

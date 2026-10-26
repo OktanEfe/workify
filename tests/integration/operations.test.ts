@@ -231,11 +231,18 @@ suite('PostgreSQL: kurum, görev, özel alan ve audit', () => {
         password: await hash(password),
       },
     });
+    // Eski MFA kaydı parola ile girişi engellememeli.
+    await db.user.update({
+      where: { id: actor.userId },
+      data: { twoFactorEnabled: true },
+    });
     const auth = getAuth();
     const login = await auth.api.signInEmail({
       body: { email: user.email, password },
       returnHeaders: true,
     });
+    expect(login.response).not.toHaveProperty('twoFactorRedirect');
+    expect(await db.session.count({ where: { userId: actor.userId } })).toBe(1);
     const cookie = login.headers
       .getSetCookie()
       .map((v) => v.split(';')[0])
