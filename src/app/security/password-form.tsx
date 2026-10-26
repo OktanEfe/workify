@@ -39,9 +39,8 @@ export function PasswordForm() {
           else {
             form.reset();
             setSuccess(true);
-            setMessage(
-              'Parolanız değiştirildi. Diğer cihazlardaki oturumlarınız kapatıldı.',
-            );
+            setMessage('Parolanız değiştirildi. Çalışma alanı açılıyor…');
+            window.location.replace('/workspace');
           }
         } catch {
           setMessage('Bağlantı kurulamadı. Lütfen tekrar deneyin.');

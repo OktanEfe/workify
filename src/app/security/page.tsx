@@ -1,7 +1,6 @@
 import { db } from '@/lib/db';
 import { currentActor } from '@/lib/current-actor';
 import { SecurityForm } from './form';
-import Link from 'next/link';
 import { PasswordForm } from './password-form';
 export const dynamic = 'force-dynamic';
 export default async function Security() {
@@ -10,14 +9,21 @@ export default async function Security() {
     where: { id: actor.userId },
     select: { twoFactorEnabled: true },
   });
+  const requiresMfaSetup =
+    process.env.NODE_ENV === 'production' &&
+    actor.role === 'ADMIN' &&
+    !user.twoFactorEnabled;
   return (
     <main className="security-page">
       <section className="security-shell">
-        <Link className="security-brand" href="/workspace">
+        <a
+          className="security-brand"
+          href={requiresMfaSetup ? '#mfa-setup' : '/workspace'}
+        >
           avrasia<span>HESABINIZ, KONTROLÜNÜZDE</span>
-        </Link>
+        </a>
         <h1>Hesap güvenliği</h1>
-        <section className="panel security-section">
+        <section id="mfa-setup" className="panel security-section">
           <h2>İki aşamalı doğrulama</h2>
           <p>
             {user.twoFactorEnabled
@@ -36,7 +42,13 @@ export default async function Security() {
           <PasswordForm />
         </section>
         <p>
-          <Link href="/workspace">Çalışma alanına dön</Link>
+          {requiresMfaSetup ? (
+            <a href="#mfa-setup">
+              Çalışma alanını açmak için doğrulamayı tamamla
+            </a>
+          ) : (
+            <a href="/workspace">Çalışma alanına dön</a>
+          )}
         </p>
       </section>
     </main>

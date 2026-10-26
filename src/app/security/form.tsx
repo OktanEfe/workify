@@ -1,12 +1,10 @@
 'use client';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { QRCodeSVG } from 'qrcode.react';
 import { createAuthClient } from 'better-auth/react';
 import { twoFactorClient } from 'better-auth/client/plugins';
 const auth = createAuthClient({ plugins: [twoFactorClient()] });
 export function SecurityForm() {
-  const router = useRouter();
   const [setup, setSetup] = useState<{
     totpURI: string;
     backupCodes: string[];
@@ -38,8 +36,7 @@ export function SecurityForm() {
               else {
                 setSetup(null);
                 setMessage('İki aşamalı doğrulama etkinleştirildi.');
-                router.replace('/workspace');
-                router.refresh();
+                window.location.replace('/workspace');
               }
             }
           } catch {
